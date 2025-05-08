@@ -48,6 +48,7 @@ const AudioPlayerContent: FC<AudioPlayerProps> = ({
     togglePlay();
   };
 
+  // не работает в хроме. только в мозилле
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!audioRef.current) return;
 
