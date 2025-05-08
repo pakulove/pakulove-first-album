@@ -10,8 +10,8 @@ function App() {
 
   return (
     <>
-      <AudioPlayer src={A_URL}></AudioPlayer>
-      <AudioPlayer src={B_URL}></AudioPlayer>
+      <AudioPlayer src={A_URL} title='Первый трек'></AudioPlayer>
+      <AudioPlayer src={B_URL} title='Второй трекь'></AudioPlayer>
     </>
   )
 }
