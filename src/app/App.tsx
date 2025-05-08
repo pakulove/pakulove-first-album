@@ -4,9 +4,15 @@ import './App.css';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
+interface Track {
+  title: string,
+  prod: string,
+}
+
 function App() {
   const [tracks, setTracks] = useState<string[]>([]);
   const [titles, setTitles] = useState<string[]>([]);
+  const [prods, setProds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,15 +23,16 @@ function App() {
         if (!response.ok) {
           throw new Error('Failed to fetch playlist');
         }
-        const data: string[] = await response.json();
+        const data: Track[] = await response.json();
         const trackUrls = data.map(
-          (_, index) => `${BASE_URL}/stream/${index+1}.mp3`
+          (_, index) => `${BASE_URL}/stream/${index + 1}.mp3`
         );
-        const trackNames = data.map(
-          (track) => track
-        );
+        const trackNames = data.map((track) => track['title']);
+        const trackProds = data.map((track) => track['prod']);
+
         setTracks(trackUrls);
-        setTitles(trackNames)
+        setTitles(trackNames);
+        setProds(trackProds);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -51,6 +58,8 @@ function App() {
           key={index}
           src={trackUrl}
           title={titles[index]}
+          prod={prods[index]}
+          coverUrl={`${BASE_URL}/cover/${index + 1}.png/`}
         />
       ))}
     </>

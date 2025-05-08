@@ -9,6 +9,8 @@ type AudioPlayerProps = React.DetailedHTMLProps<
   HTMLAudioElement
 > & {
   title: string;
+  prod: string,
+  coverUrl: string;
 };
 
 const formatTime = (seconds: number) => {
@@ -25,7 +27,12 @@ export const AudioPlayer: FC<AudioPlayerProps> = (props) => {
   );
 };
 
-const AudioPlayerContent: FC<AudioPlayerProps> = ({ title, ...props }) => {
+const AudioPlayerContent: FC<AudioPlayerProps> = ({
+  title,
+  prod,
+  coverUrl,
+  ...props
+}) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { progress, duration, togglePlay, isPlaying } =
     useStrictContext(audioStoreContext);
@@ -55,9 +62,15 @@ const AudioPlayerContent: FC<AudioPlayerProps> = ({ title, ...props }) => {
 
   return (
     <div className={styles.player_container}>
+      <img
+        src={coverUrl}
+        alt={`Cover for ${title}`}
+        className={styles.cover_image}
+      />
       <h1 className={styles.player_title}>{title}</h1>
+      <p className={styles.player_production}>prod. by {prod}</p>
       <button className={styles.play_button} onClick={handleClick}>
-        {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+        {isPlaying ? '⏸' : '▶'}
       </button>
       <div className={styles.progress_container}>
         <div

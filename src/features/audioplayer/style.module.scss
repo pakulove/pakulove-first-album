@@ -4,37 +4,62 @@
   margin: 2rem auto;
   padding: 2rem;
   border-radius: 12px;
-  background: #f5f5f5;
+  background: #1f1f1f;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   font-family: Arial, sans-serif;
   text-align: center;
 }
 
+.cover_image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
 .player_title {
-  color: #333;
+  color: #cdcdcd;
+  margin-bottom: 0.6rem;
+}
+
+.player_production {
+  color: rgba(134, 134, 134, 0.824);
   margin-bottom: 1.5rem;
+  font-size: small;
 }
 
 .play_button {
-  background: #4CAF50;
+  background: #1e1e1e;
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 30px;
-  font-size: 16px;
+  border-radius: 25px;
+  font-size: 20px;
+  font-family: 'Courier New', Courier, monospace;
   cursor: pointer;
+  text-align: center;
+  text-justify: center;
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;
+  --webkit-transition: border 0.3s ease;
   display: flex;
+  border: none;
   align-items: center;
   justify-content: center;
   gap: 8px;
   margin: 0 auto;
+  min-width: 80px;
+  height: 48px;
+  position: relative;
+  line-height: 48px; 
+  padding: 0; 
 }
 
 .play_button:hover {
-  background: #45a049;
-  transform: scale(1.05);
+  background: #1e1e1e;
+  border: solid white 1px;
 }
 
 .progress_container {
@@ -53,7 +78,7 @@
 
 .progress {
   height: 100%;
-  background: #4CAF50;
+  background: #bc8b3c;
   width: 0%;
   transition: width 0.1s linear;
 }
