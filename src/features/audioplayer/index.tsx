@@ -1,8 +1,8 @@
 import { useStrictContext } from '@shared/lib/react';
 import { useRef, type FC } from 'react';
 import { audioStoreContext, AudioStoreProvider } from './audiostoreprovider';
+import styles from './style.module.scss';
 import { useProgressBar } from './useProgressBar';
-import styles from './style.module.scss'
 
 type AudioPlayerProps = React.DetailedHTMLProps<
   React.AudioHTMLAttributes<HTMLAudioElement>,
@@ -25,11 +25,12 @@ export const AudioPlayer: FC<AudioPlayerProps> = (props) => {
   );
 };
 
-const AudioPlayerContent: FC<AudioPlayerProps> = ({title, ...props}) => {
+const AudioPlayerContent: FC<AudioPlayerProps> = ({ title, ...props }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { progress, duration, togglePlay, isPlaying } =
     useStrictContext(audioStoreContext);
   const { onEnded, onLoadMetadata, onTimeUpdate } = useProgressBar(audioRef);
+
   const handleClick = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
@@ -39,6 +40,19 @@ const AudioPlayerContent: FC<AudioPlayerProps> = ({title, ...props}) => {
     }
     togglePlay();
   };
+
+  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current) return;
+
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const clickPosition = e.clientX - rect.left;
+    const percentage = (clickPosition / rect.width) * 100;
+    const newTime = (percentage / 100) * duration;
+
+    audioRef.current.currentTime = newTime;
+  };
+
   return (
     <div className={styles.player_container}>
       <h1 className={styles.player_title}>{title}</h1>
@@ -46,7 +60,11 @@ const AudioPlayerContent: FC<AudioPlayerProps> = ({title, ...props}) => {
         {isPlaying ? '⏸️ Pause' : '▶️ Play'}
       </button>
       <div className={styles.progress_container}>
-        <div className={styles.progress_bar}>
+        <div
+          className={styles.progress_bar}
+          onClick={handleProgressBarClick}
+          style={{ cursor: 'pointer' }}
+        >
           <div className={styles.progress} style={{ width: `${progress}%` }} />
         </div>
         <div className={styles.time_display}>
