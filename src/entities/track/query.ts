@@ -14,7 +14,7 @@ export const tracksQueryOptions = {
       title,
       productBy: prod,
       url: `${BASE_URL}/stream/${index + 1}.mp3`,
-      coverURL: `${BASE_URL}/cover/${index + 1}.png`,
+      coverURL: `${BASE_URL}/cover/cover.png`,
     }))
   },
 }

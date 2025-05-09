@@ -7,9 +7,13 @@ import { BASE_URL } from '@shared/api/base';
 import { trackService } from '@shared/api/track';
 import { useStrictContext } from '@shared/lib/react';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
 import style from './style.module.scss';
 
 const HomePageContent = () => {
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const popupContentRef = useRef<HTMLDivElement>(null);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['tracks'],
     queryFn: async () => {
@@ -17,12 +21,34 @@ const HomePageContent = () => {
       return data.map((track, index) => ({
         ...track,
         url: `${BASE_URL}/stream/${index + 1}.mp3/`,
-        coverURL: `${BASE_URL}/cover/${index + 1}.png/`,
+        coverURL: `${BASE_URL}/cover/cover.png/`,
       }));
     },
   });
 
   const { currentTrackIndex } = useStrictContext(audioStoreContext);
+
+  const togglePopup = () => {
+    setIsPopupVisible(!isPopupVisible);
+  };
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        popupContentRef.current &&
+        !popupContentRef.current.contains(event.target as Node) &&
+        isPopupVisible
+      ) {
+        setIsPopupVisible(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPopupVisible]);
 
   if (isLoading) {
     return <div>Loading playlist...</div>;
@@ -59,6 +85,52 @@ const HomePageContent = () => {
           }}
         />
       </section>
+
+      {/* Pull Tab */}
+      <div className={style.pull_tab} onClick={togglePopup}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+      </div>
+
+      {/* Popup */}
+      <div
+        className={`${style.popup_overlay} ${
+          isPopupVisible ? style.visible : ''
+        }`}
+      >
+        <div className={style.popup_content} ref={popupContentRef}>
+          <div className={style.popup_img_wrapper}>
+            <div className={style.cover_side}>
+              <img
+                className={style.popup_img}
+                src={`${BASE_URL}/cover/cover.png`}
+                alt="Front cover"
+              />
+              <span className={style.side_label}>Лицевая сторона</span>
+            </div>
+            <img
+              className={style.popup_img}
+              src={`${BASE_URL}/cover/disks.png`}
+              style={{  
+                verticalAlign: 'center',
+                width: '18rem',
+                height: '11rem',
+                objectFit: 'contain',
+              }}
+              alt="disks"
+            />
+            <div className={style.cover_side}>
+              <img
+                className={style.popup_img}
+                src={`${BASE_URL}/cover/reverse.png`}
+                alt="Back cover"
+              />
+              <span className={style.side_label}>Оборотная сторона</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
