@@ -11,8 +11,10 @@ import { useEffect, useRef, useState } from 'react';
 import style from './style.module.scss';
 
 const HomePageContent = () => {
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const popupContentRef = useRef<HTMLDivElement>(null);
+  const [isRightPopupVisible, setIsRightPopupVisible] = useState(false);
+  const [isLeftPopupVisible, setIsLeftPopupVisible] = useState(true)
+  const rightPopupContentRef = useRef<HTMLDivElement>(null);
+  const leftPopupContentRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['tracks'],
@@ -26,21 +28,54 @@ const HomePageContent = () => {
     },
   });
 
-  const { currentTrackIndex } = useStrictContext(audioStoreContext);
+  const { currentTrackIndex, setCurrentTrackIndex, updateIsPlaying } =
+    useStrictContext(audioStoreContext);
 
-  const togglePopup = () => {
-    setIsPopupVisible(!isPopupVisible);
+  const toggleRightPopup = () => {
+    setIsRightPopupVisible(!isRightPopupVisible);
+    setIsLeftPopupVisible(false); // Close the other popup if open
   };
 
-  // Close popup when clicking outside
+  const toggleLeftPopup = () => {
+    setIsLeftPopupVisible(!isLeftPopupVisible);
+    setIsRightPopupVisible(false); // Close the other popup if open
+  };
+
+  const playFirstTrack = () => {
+    setIsLeftPopupVisible(false);
+
+    document.querySelectorAll('audio').forEach((audio) => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    const firstAudio = document.querySelector(
+      'audio[data-index="0"]'
+    ) as HTMLAudioElement;
+
+    if (firstAudio) {
+      firstAudio.play();
+      setCurrentTrackIndex(0);
+      updateIsPlaying(true);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        popupContentRef.current &&
-        !popupContentRef.current.contains(event.target as Node) &&
-        isPopupVisible
+        rightPopupContentRef.current &&
+        !rightPopupContentRef.current.contains(event.target as Node) &&
+        isRightPopupVisible
       ) {
-        setIsPopupVisible(false);
+        setIsRightPopupVisible(false);
+      }
+
+      if (
+        leftPopupContentRef.current &&
+        !leftPopupContentRef.current.contains(event.target as Node) &&
+        isLeftPopupVisible
+      ) {
+        setIsLeftPopupVisible(false);
       }
     };
 
@@ -48,7 +83,7 @@ const HomePageContent = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isPopupVisible]);
+  }, [isRightPopupVisible, isLeftPopupVisible]);
 
   if (isLoading) {
     return <div>Loading playlist...</div>;
@@ -86,20 +121,30 @@ const HomePageContent = () => {
         />
       </section>
 
-      {/* Pull Tab */}
-      <div className={style.pull_tab} onClick={togglePopup}>
+      {/* Right Pull Tab */}
+      <div className={style.pull_tab} onClick={toggleRightPopup}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
         </svg>
       </div>
 
-      {/* Popup */}
+      {/* Left Pull Tab */}
+      <div
+        className={`${style.pull_tab} ${style.left}`}
+        onClick={toggleLeftPopup}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+        </svg>
+      </div>
+
+      {/* Right Popup - Album Cover */}
       <div
         className={`${style.popup_overlay} ${
-          isPopupVisible ? style.visible : ''
+          isRightPopupVisible ? style.visible : ''
         }`}
       >
-        <div className={style.popup_content} ref={popupContentRef}>
+        <div className={style.popup_content} ref={rightPopupContentRef}>
           <div className={style.popup_img_wrapper}>
             <div className={style.cover_side}>
               <img
@@ -107,12 +152,12 @@ const HomePageContent = () => {
                 src={`${BASE_URL}/cover/cover.png`}
                 alt="Front cover"
               />
-              <span className={style.side_label}>Лицевая сторона</span>
+              <span className={style.side_label}>лицевая сторона</span>
             </div>
             <img
               className={style.popup_img}
               src={`${BASE_URL}/cover/disks.png`}
-              style={{  
+              style={{
                 verticalAlign: 'center',
                 width: '18rem',
                 height: '11rem',
@@ -126,9 +171,26 @@ const HomePageContent = () => {
                 src={`${BASE_URL}/cover/reverse.png`}
                 alt="Back cover"
               />
-              <span className={style.side_label}>Оборотная сторона</span>
+              <span className={style.side_label}>оборотная сторона</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Left Popup - Album Info */}
+      <div
+        className={`${style.popup_overlay} ${
+          isLeftPopupVisible ? style.visible : ''
+        }`}
+      >
+        <div className={style.popup_content} ref={leftPopupContentRef}>
+          <h2 className={style.popup_title}>skeesh - цсмж ч.1</h2>
+          <button className={style.play_all_button} onClick={playFirstTrack}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            прикоснуться
+          </button>
         </div>
       </div>
     </div>
