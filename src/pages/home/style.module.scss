@@ -1,0 +1,38 @@
+.home_container {
+  display: flex;
+  gap: 3rem;
+}
+
+.img_wrapper {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  padding: 3rem 0;
+  margin-right: 3rem;
+}
+
+.static_img {
+  flex: 1 1 0;
+  border-radius: 12px;
+}
+
+.track_list {
+  display: flex;
+  width: max-content;
+  max-height: 100vh;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 3rem;
+  overflow-y: auto;
+  &::after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--background-color) 2%, rgba(255, 255, 255, 0) 55%);
+  }
+}
+
+.wrapper {
+  position: relative;
+}
