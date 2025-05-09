@@ -1,5 +1,8 @@
 import { AudioPlayer } from '@features/audioplayer';
-import { audioStoreContext, AudioStoreProvider } from '@features/audioplayer/audiostoreprovider';
+import {
+  audioStoreContext,
+  AudioStoreProvider,
+} from '@features/audioplayer/audiostoreprovider';
 import { BASE_URL } from '@shared/api/base';
 import { trackService } from '@shared/api/track';
 import { useStrictContext } from '@shared/lib/react';
@@ -30,9 +33,7 @@ const HomePageContent = () => {
   }
 
   const currentCover =
-    currentTrackIndex !== null && data
-      ? data[currentTrackIndex]
-      : data?.[0];
+    currentTrackIndex !== null && data ? data[currentTrackIndex] : data?.[0];
 
   return (
     <div className={style.home_container}>
@@ -55,7 +56,6 @@ const HomePageContent = () => {
           className={style.static_img}
           style={{
             backgroundImage: `url(${currentCover?.coverURL})`,
-            width: currentCover?.coverWidth,
           }}
         />
       </section>
