@@ -31,8 +31,8 @@ const HomePageContent = () => {
 
   const currentCover =
     currentTrackIndex !== null && data
-      ? data[currentTrackIndex]?.coverURL
-      : data?.[0]?.coverURL;
+      ? data[currentTrackIndex]
+      : data?.[0];
 
   return (
     <div className={style.home_container}>
@@ -54,7 +54,8 @@ const HomePageContent = () => {
         <div
           className={style.static_img}
           style={{
-            backgroundImage: `url(${currentCover})`,
+            backgroundImage: `url(${currentCover?.coverURL})`,
+            width: currentCover?.coverWidth,
           }}
         />
       </section>
