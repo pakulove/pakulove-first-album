@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useActiveTrackStore } from './store'
 import style from './style.module.scss'
 
-const trackExists = (index: number, tracks: unknown[]) => index + 1 <= tracks.length
+const trackExists = (index: number, tracks: unknown[]) => index < tracks.length
 
 const HomePage = () => {
   const [isRightPopupVisible, setIsRightPopupVisible] = useState(false)
