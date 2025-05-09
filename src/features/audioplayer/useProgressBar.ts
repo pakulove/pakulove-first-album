@@ -16,6 +16,7 @@ export const useProgressBar = (
     if (audioRef.current) {
       const currentProgress =
         (audioRef.current.currentTime / audioRef.current.duration) * 100;
+
       updateProgress(currentProgress);
     }
   };

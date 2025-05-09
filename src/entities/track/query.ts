@@ -1,6 +1,7 @@
 import { BASE_URL } from '@shared/api/base'
 import { queryClient } from '@shared/api/query-client'
 import { trackService, type TracksDTO } from '@shared/api/track'
+import type { TTrack } from './type'
 
 const TRACKS_QUERY_KEY = 'get-all-tracks'
 
@@ -10,12 +11,13 @@ export const tracksQueryOptions = {
     return await trackService.getTracks()
   },
   select: (tracks: TracksDTO) => {
-    return tracks.map(({ prod, title }, index) => ({
+    return tracks.map<TTrack>(({ prod, title, pics }, index) => ({
       title,
       productBy: prod,
+      picturesAtTime: pics.map(({sec, name}) => ({second: sec, name})),
       url: `${BASE_URL}/stream/${index + 1}.mp3`,
-      coverURL: `${BASE_URL}/cover/cover.png`,
-    }))
+      coverURL: `${BASE_URL}/cover/`,
+    }));
   },
 }
 

@@ -1,10 +1,10 @@
+import { tracksQueryOptions } from '@entities/track';
 import { AudioPlayer } from '@features/audioplayer';
 import {
   audioStoreContext,
   AudioStoreProvider,
 } from '@features/audioplayer/audiostoreprovider';
 import { BASE_URL } from '@shared/api/base';
-import { trackService } from '@shared/api/track';
 import { useStrictContext } from '@shared/lib/react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -12,33 +12,23 @@ import style from './style.module.scss';
 
 const HomePageContent = () => {
   const [isRightPopupVisible, setIsRightPopupVisible] = useState(false);
-  const [isLeftPopupVisible, setIsLeftPopupVisible] = useState(true)
+  const [isLeftPopupVisible, setIsLeftPopupVisible] = useState(true);
   const rightPopupContentRef = useRef<HTMLDivElement>(null);
   const leftPopupContentRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['tracks'],
-    queryFn: async () => {
-      const data = await trackService.getTracks();
-      return data.map((track, index) => ({
-        ...track,
-        url: `${BASE_URL}/stream/${index + 1}.mp3/`,
-        coverURL: `${BASE_URL}/cover/cover.png/`,
-      }));
-    },
-  });
+  const { data, isLoading, isError, error } = useQuery(tracksQueryOptions);
 
   const { currentTrackIndex, setCurrentTrackIndex, updateIsPlaying } =
     useStrictContext(audioStoreContext);
 
   const toggleRightPopup = () => {
     setIsRightPopupVisible(!isRightPopupVisible);
-    setIsLeftPopupVisible(false); // Close the other popup if open
+    setIsLeftPopupVisible(false);
   };
 
   const toggleLeftPopup = () => {
     setIsLeftPopupVisible(!isLeftPopupVisible);
-    setIsRightPopupVisible(false); // Close the other popup if open
+    setIsRightPopupVisible(false);
   };
 
   const playFirstTrack = () => {
@@ -100,12 +90,12 @@ const HomePageContent = () => {
     <div className={style.home_container}>
       <div className={style.wrapper}>
         <section className={style.track_list}>
-          {data?.map(({ prod, title, url, coverURL }, index) => (
+          {data?.map(({ productBy, title, url, coverURL }, index) => (
             <AudioPlayer
               key={url}
               src={url}
               title={title}
-              prod={prod}
+              prod={productBy}
               coverUrl={coverURL}
               trackIndex={index}
             />
@@ -116,7 +106,7 @@ const HomePageContent = () => {
         <div
           className={style.static_img}
           style={{
-            backgroundImage: `url(${currentCover?.coverURL})`,
+            backgroundImage: `url(${BASE_URL}/cover/${name})`,
           }}
         />
       </section>

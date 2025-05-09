@@ -5,7 +5,7 @@ import { BASE_URL } from './base'
 const TrackDTOSchema = z.object({
   title: z.string(),
   prod: z.string(),
-  coverWidth: z.string(),
+  pics: z.object({sec: z.number(), name: z.string()}).array(),
 })
 
 const TracksDTOSchema = TrackDTOSchema.array()
