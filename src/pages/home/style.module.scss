@@ -29,8 +29,23 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, var(--background-color) 2%, rgba(255, 255, 255, 0) 55%);
+    background: linear-gradient(to top, var(--background-color) 0.5%, rgba(255, 255, 255, 0) 35%);
   }
+  &::before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, var(--background-color) 0.5%, rgba(255, 255, 255, 0) 35%);
+  }
+}
+
+.track_list:last-child { 
+  padding-bottom: 15rem;
+}
+
+.track_list:first-child {
+  padding-top: 15rem;
 }
 
 .wrapper {
