@@ -1,6 +1,6 @@
 import { useStrictContext } from '@shared/lib/react';
 import { useRef, type FC } from 'react';
-import { audioStoreContext, AudioStoreProvider } from './audiostoreprovider';
+import { audioStoreContext } from './audiostoreprovider';
 import styles from './style.module.scss';
 import { useProgressBar } from './useProgressBar';
 
@@ -9,8 +9,9 @@ type AudioPlayerProps = React.DetailedHTMLProps<
   HTMLAudioElement
 > & {
   title: string;
-  prod: string,
+  prod: string;
   coverUrl: string;
+  trackIndex: number;
 };
 
 const formatTime = (seconds: number) => {
@@ -19,47 +20,82 @@ const formatTime = (seconds: number) => {
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
-export const AudioPlayer: FC<AudioPlayerProps> = (props) => {
-  return (
-    <AudioStoreProvider>
-      <AudioPlayerContent {...props} />
-    </AudioStoreProvider>
-  );
-};
-
-const AudioPlayerContent: FC<AudioPlayerProps> = ({
+export const AudioPlayer: FC<AudioPlayerProps> = ({
   title,
   prod,
   coverUrl,
+  trackIndex,
   ...props
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { progress, duration, togglePlay, isPlaying } =
-    useStrictContext(audioStoreContext);
+  const {
+    progress,
+    duration,
+    isPlaying,
+    currentTrackIndex,
+    setCurrentTrackIndex,
+    updateIsPlaying,
+    updateProgress,
+  } = useStrictContext(audioStoreContext);
   const { onEnded, onLoadMetadata, onTimeUpdate } = useProgressBar(audioRef);
 
   const handleClick = () => {
     if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
+
+    if (currentTrackIndex === trackIndex) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        updateIsPlaying(false);
+      } else {
+        audioRef.current.play();
+        updateIsPlaying(true);
+      }
+      return;
     }
-    togglePlay();
+
+    // Reset progress of the current track
+    if (currentTrackIndex !== null) {
+      const currentAudio = document.querySelector(
+        `audio[data-index="${currentTrackIndex}"]`
+      ) as HTMLAudioElement;
+      if (currentAudio) {
+        currentAudio.currentTime = 0;
+        updateProgress(0);
+      }
+    }
+
+    // Stop all other audio elements
+    document.querySelectorAll('audio').forEach((audio) => {
+      if (audio !== audioRef.current) {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    });
+
+    audioRef.current.play();
+    setCurrentTrackIndex(trackIndex);
+    updateIsPlaying(true);
   };
 
-  // не работает в хроме. только в мозилле
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !isCurrentTrack) return;
 
     const progressBar = e.currentTarget;
     const rect = progressBar.getBoundingClientRect();
     const clickPosition = e.clientX - rect.left;
-    const percentage = (clickPosition / rect.width) * 100;
-    const newTime = (percentage / 100) * duration;
+    const percentage = Math.min(
+      Math.max((clickPosition / rect.width) * 100, 0),
+      100
+    );
+    const newTime = (percentage / 100) * audioRef.current.duration;
 
-    audioRef.current.currentTime = newTime;
+    if (isFinite(newTime)) {
+      audioRef.current.currentTime = newTime;
+    }
   };
+
+  const isCurrentTrack = currentTrackIndex === trackIndex;
+  const showPauseButton = isCurrentTrack && isPlaying;
 
   return (
     <div className={styles.player_container}>
@@ -71,7 +107,7 @@ const AudioPlayerContent: FC<AudioPlayerProps> = ({
       <h1 className={styles.player_title}>{title}</h1>
       <p className={styles.player_production}>prod. by {prod}</p>
       <button className={styles.play_button} onClick={handleClick}>
-        {isPlaying ? '⏸' : '▶'}
+        {showPauseButton ? '⏸' : '▶'}
       </button>
       <div className={styles.progress_container}>
         <div
@@ -79,7 +115,12 @@ const AudioPlayerContent: FC<AudioPlayerProps> = ({
           onClick={handleProgressBarClick}
           style={{ cursor: 'pointer' }}
         >
-          <div className={styles.progress} style={{ width: `${progress}%` }} />
+          <div
+            className={styles.progress}
+            style={{
+              width: isCurrentTrack ? `${progress}%` : '0%',
+            }}
+          />
         </div>
         <div className={styles.time_display}>
           <span>{formatTime((progress / 100) * duration)} </span>
@@ -89,6 +130,7 @@ const AudioPlayerContent: FC<AudioPlayerProps> = ({
       <audio
         {...props}
         ref={audioRef}
+        data-index={trackIndex}
         onTimeUpdate={onTimeUpdate}
         onLoadedMetadata={onLoadMetadata}
         onEnded={onEnded}
