@@ -1,5 +1,5 @@
 import { useStrictContext } from '@shared/lib/react';
-import { useRef, useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 import { audioStoreContext } from './audiostoreprovider';
 import styles from './style.module.scss';
 import { useProgressBar } from './useProgressBar';
@@ -29,6 +29,7 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
   ...props
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [trackDuration, setTrackDuration] = useState(0);
   const [trackCurrentTime, setTrackCurrentTime] = useState(0);
 
@@ -41,7 +42,6 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
     updateProgress,
   } = useStrictContext(audioStoreContext);
 
-  // Use our own handlers for time tracking
   const onTimeUpdateLocal = () => {
     if (audioRef.current) {
       setTrackCurrentTime(audioRef.current.currentTime);
@@ -54,14 +54,21 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
     }
   };
 
-  // Get the shared progress updating and track advancement logic
   const { onEnded, onTimeUpdate, onLoadMetadata } = useProgressBar(audioRef);
 
   const isCurrentTrack = currentTrackIndex === trackIndex;
   const showPauseButton = isCurrentTrack && isPlaying;
 
-  // Calculate current time to display
   const displayTime = isCurrentTrack ? (progress / 100) * trackDuration : 0;
+
+  useEffect(() => {
+    if (isCurrentTrack && containerRef.current) {
+      containerRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    }
+  }, [isCurrentTrack, currentTrackIndex]);
 
   const handleClick = () => {
     if (!audioRef.current) return;
@@ -116,7 +123,6 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
     }
   };
 
-  // Combined event handlers
   const handleTimeUpdate = () => {
     onTimeUpdate();
     onTimeUpdateLocal();
@@ -129,6 +135,7 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
 
   return (
     <div
+      ref={containerRef}
       className={`${styles.player_container} ${
         isCurrentTrack ? styles.current : ''
       }`}
