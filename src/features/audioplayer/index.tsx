@@ -1,5 +1,5 @@
 import { useStrictContext } from '@shared/lib/react';
-import { useRef, type FC } from 'react';
+import { useRef, useState, type FC } from 'react';
 import { audioStoreContext } from './audiostoreprovider';
 import styles from './style.module.scss';
 import { useProgressBar } from './useProgressBar';
@@ -15,6 +15,7 @@ type AudioPlayerProps = React.DetailedHTMLProps<
 };
 
 const formatTime = (seconds: number) => {
+  if (!isFinite(seconds) || isNaN(seconds)) return '0:00';
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -28,16 +29,39 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
   ...props
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [trackDuration, setTrackDuration] = useState(0);
+  const [trackCurrentTime, setTrackCurrentTime] = useState(0);
+
   const {
     progress,
-    duration,
     isPlaying,
     currentTrackIndex,
     setCurrentTrackIndex,
     updateIsPlaying,
     updateProgress,
   } = useStrictContext(audioStoreContext);
-  const { onEnded, onLoadMetadata, onTimeUpdate } = useProgressBar(audioRef);
+
+  // Use our own handlers for time tracking
+  const onTimeUpdateLocal = () => {
+    if (audioRef.current) {
+      setTrackCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const onLoadMetadataLocal = () => {
+    if (audioRef.current) {
+      setTrackDuration(audioRef.current.duration);
+    }
+  };
+
+  // Get the shared progress updating and track advancement logic
+  const { onEnded, onTimeUpdate, onLoadMetadata } = useProgressBar(audioRef);
+
+  const isCurrentTrack = currentTrackIndex === trackIndex;
+  const showPauseButton = isCurrentTrack && isPlaying;
+
+  // Calculate current time to display
+  const displayTime = isCurrentTrack ? (progress / 100) * trackDuration : 0;
 
   const handleClick = () => {
     if (!audioRef.current) return;
@@ -92,8 +116,16 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
     }
   };
 
-  const isCurrentTrack = currentTrackIndex === trackIndex;
-  const showPauseButton = isCurrentTrack && isPlaying;
+  // Combined event handlers
+  const handleTimeUpdate = () => {
+    onTimeUpdate();
+    onTimeUpdateLocal();
+  };
+
+  const handleLoadMetadata = () => {
+    onLoadMetadata();
+    onLoadMetadataLocal();
+  };
 
   return (
     <div
@@ -125,16 +157,16 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
           />
         </div>
         <div className={styles.time_display}>
-          <span>{formatTime((progress / 100) * duration)} </span>
-          <span>{formatTime(duration)}</span>
+          <span>{formatTime(displayTime)} </span>
+          <span>{formatTime(trackDuration)}</span>
         </div>
       </div>
       <audio
         {...props}
         ref={audioRef}
         data-index={trackIndex}
-        onTimeUpdate={onTimeUpdate}
-        onLoadedMetadata={onLoadMetadata}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadMetadata}
         onEnded={onEnded}
       />
     </div>
