@@ -53,7 +53,6 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
       return;
     }
 
-    // Reset progress of the current track
     if (currentTrackIndex !== null) {
       const currentAudio = document.querySelector(
         `audio[data-index="${currentTrackIndex}"]`
@@ -64,7 +63,6 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
       }
     }
 
-    // Stop all other audio elements
     document.querySelectorAll('audio').forEach((audio) => {
       if (audio !== audioRef.current) {
         audio.pause();
@@ -98,7 +96,11 @@ export const AudioPlayer: FC<AudioPlayerProps> = ({
   const showPauseButton = isCurrentTrack && isPlaying;
 
   return (
-    <div className={styles.player_container}>
+    <div
+      className={`${styles.player_container} ${
+        isCurrentTrack ? styles.current : ''
+      }`}
+    >
       <img
         src={coverUrl}
         alt={`Cover for ${title}`}
