@@ -1,181 +1,145 @@
-import { useStrictContext } from '@shared/lib/react';
-import { useEffect, useRef, useState, type FC } from 'react';
-import { audioStoreContext } from './audiostoreprovider';
-import styles from './style.module.scss';
-import { useProgressBar } from './useProgressBar';
+import { useStrictContext } from '@shared/lib/react'
+import cn from 'classnames'
+import { useEffect, useRef, type FC } from 'react'
+import { audioStoreContext, AudioStoreProvider } from './audiostoreprovider'
+import styles from './style.module.scss'
+import { useProgressBar } from './useProgressBar'
 
 type AudioPlayerProps = React.DetailedHTMLProps<
   React.AudioHTMLAttributes<HTMLAudioElement>,
   HTMLAudioElement
 > & {
-  title: string;
-  prod: string;
-  coverUrl: string;
-  trackIndex: number;
-};
+  title: string
+  prod: string
+  coverUrl: string
+  onStarted: () => void
+  onEnded: () => void
+  isActive: boolean
+}
 
 const formatTime = (seconds: number) => {
-  if (!isFinite(seconds) || isNaN(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-};
+  if (!isFinite(seconds) || isNaN(seconds)) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`
+}
 
-export const AudioPlayer: FC<AudioPlayerProps> = ({
-  title,
-  prod,
-  coverUrl,
-  trackIndex,
-  ...props
-}) => {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [trackDuration, setTrackDuration] = useState(0);
-  const [trackCurrentTime, setTrackCurrentTime] = useState(0);
+const isTrackOver = (progress: number) => progress === 100
 
-  const {
-    progress,
-    isPlaying,
-    currentTrackIndex,
-    setCurrentTrackIndex,
-    updateIsPlaying,
-    updateProgress,
-  } = useStrictContext(audioStoreContext);
+export const AudioPlayer: FC<AudioPlayerProps> = props => {
+  return (
+    <AudioStoreProvider>
+      <AudioPlayerContent {...props} />
+    </AudioStoreProvider>
+  )
+}
 
-  const onTimeUpdateLocal = () => {
-    if (audioRef.current) {
-      setTrackCurrentTime(audioRef.current.currentTime);
+export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { title, prod, coverUrl, onStarted, onEnded, isActive, ...htmlProps } = props
+
+  const { progress, isPlaying, currentTime, durationTime, updateIsPlaying } =
+    useStrictContext(audioStoreContext)
+
+  const progressBar = useProgressBar(audioRef)
+
+  const scrollTo = () => {
+    containerRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    })
+  }
+
+  const handleResume = () => {
+    if (!audioRef.current) return
+    if (!isPlaying) {
+      scrollTo()
+      audioRef.current.play()
+      updateIsPlaying(true)
     }
-  };
+  }
 
-  const onLoadMetadataLocal = () => {
-    if (audioRef.current) {
-      setTrackDuration(audioRef.current.duration);
+  const handlePause = () => {
+    if (!audioRef.current) return
+    if (isPlaying) {
+      audioRef.current.pause()
+      updateIsPlaying(false)
     }
-  };
+  }
 
-  const { onEnded, onTimeUpdate, onLoadMetadata } = useProgressBar(audioRef);
+  const handlePlay = () => {
+    handleResume()
+    onStarted()
+  }
 
-  const isCurrentTrack = currentTrackIndex === trackIndex;
-  const showPauseButton = isCurrentTrack && isPlaying;
-
-  const displayTime = isCurrentTrack ? (progress / 100) * trackDuration : 0;
-
-  useEffect(() => {
-    if (isCurrentTrack && containerRef.current) {
-      containerRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    }
-  }, [isCurrentTrack, currentTrackIndex]);
-
-  const handleClick = () => {
-    if (!audioRef.current) return;
-
-    if (currentTrackIndex === trackIndex) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        updateIsPlaying(false);
-      } else {
-        audioRef.current.play();
-        updateIsPlaying(true);
-      }
-      return;
-    }
-
-    if (currentTrackIndex !== null) {
-      const currentAudio = document.querySelector(
-        `audio[data-index="${currentTrackIndex}"]`
-      ) as HTMLAudioElement;
-      if (currentAudio) {
-        currentAudio.currentTime = 0;
-        updateProgress(0);
-      }
-    }
-
-    document.querySelectorAll('audio').forEach((audio) => {
-      if (audio !== audioRef.current) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-    });
-
-    audioRef.current.play();
-    setCurrentTrackIndex(trackIndex);
-    updateIsPlaying(true);
-  };
+  const handleEnd = () => {
+    if (!audioRef.current) return
+    handlePause()
+    isTrackOver(progress) && onEnded()
+    progressBar.onEnded()
+    audioRef.current.currentTime = 0
+  }
 
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current || !isCurrentTrack) return;
+    if (!audioRef.current || !isActive) return
+    const progressBar = e.currentTarget
+    const rect = progressBar.getBoundingClientRect()
+    const clickPosition = e.clientX - rect.left
+    const percentage = Math.min(Math.max((clickPosition / rect.width) * 100, 0), 100)
+    const newTime = (percentage / 100) * audioRef.current.duration
+    audioRef.current.currentTime = newTime
+  }
 
-    const progressBar = e.currentTarget;
-    const rect = progressBar.getBoundingClientRect();
-    const clickPosition = e.clientX - rect.left;
-    const percentage = Math.min(
-      Math.max((clickPosition / rect.width) * 100, 0),
-      100
-    );
-    const newTime = (percentage / 100) * audioRef.current.duration;
-
-    if (isFinite(newTime)) {
-      audioRef.current.currentTime = newTime;
+  const togglePlay = () => {
+    if (isPlaying) {
+      handlePause()
+    } else {
+      if (isActive) handleResume()
+      else handlePlay()
     }
-  };
+  }
 
-  const handleTimeUpdate = () => {
-    onTimeUpdate();
-    onTimeUpdateLocal();
-  };
-
-  const handleLoadMetadata = () => {
-    onLoadMetadata();
-    onLoadMetadataLocal();
-  };
+  //TODO GET RID PZH
+  useEffect(() => {
+    if (isActive) {
+      handlePlay()
+    } else {
+      handleEnd()
+    }
+  }, [isActive])
 
   return (
-    <div
-      ref={containerRef}
-      className={`${styles.player_container} ${
-        isCurrentTrack ? styles.current : ''
-      }`}
-    >
-      <img
-        src={coverUrl}
-        alt={`Cover for ${title}`}
-        className={styles.cover_image}
-      />
+    <div ref={containerRef} className={cn(styles.player_container, { [styles.current]: isActive })}>
+      <img src={coverUrl} alt={`Cover for ${title}`} className={styles.cover_image} />
       <h1 className={styles.player_title}>{title}</h1>
       <p className={styles.player_production}>prod. by {prod}</p>
-      <button className={styles.play_button} onClick={handleClick}>
-        {showPauseButton ? '⏸' : '▶'}
+      <button className={styles.play_button} onClick={togglePlay}>
+        {isPlaying ? '⏸' : '▶'}
       </button>
       <div className={styles.progress_container}>
         <div
           className={styles.progress_bar}
-          onClick={handleProgressBarClick}
-          style={{ cursor: 'pointer' }}
-        >
+          style={{ cursor: isActive ? 'pointer' : 'auto' }}
+          onClick={handleProgressBarClick}>
           <div
-            className={styles.progress}
-            style={{
-              width: isCurrentTrack ? `${progress}%` : '0%',
-            }}
+            className={cn(styles.progress, { [styles.progress_active]: isActive })}
+            style={{ width: isActive ? `${progress}%` : '0%' }}
           />
         </div>
         <div className={styles.time_display}>
-          <span>{formatTime(displayTime)} </span>
-          <span>{formatTime(trackDuration)}</span>
+          <span>{formatTime(currentTime)} </span>
+          <span>{formatTime(durationTime)}</span>
         </div>
       </div>
       <audio
-        {...props}
+        {...htmlProps}
         ref={audioRef}
-        data-index={trackIndex}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadMetadata}
-        onEnded={onEnded}
+        data-index={title}
+        onEnded={handleEnd}
+        onTimeUpdate={progressBar.onTimeUpdate}
+        onLoadedMetadata={progressBar.onLoadMetadata}
       />
     </div>
-  );
-};
+  )
+}

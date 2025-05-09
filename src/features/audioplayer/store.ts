@@ -1,34 +1,33 @@
-import { create } from 'zustand';
+import { create } from 'zustand'
 
 type AudioPlayerState = {
-  duration: number;
-  progress: number;
-  isPlaying: boolean;
-  currentTrackIndex: number | null;
-};
+  currentTime: number
+  durationTime: number
+  progress: number
+  isPlaying: boolean
+}
 
 export type AudioPlayerStore = AudioPlayerState & {
-  updateDuration: (duration: number) => void;
-  updateProgress: (progress: number) => void;
-  updateIsPlaying: (isPlaying: boolean) => void;
-  togglePlay: () => void;
-  setCurrentTrackIndex: (index: number | null) => void;
-};
+  updateDuration: (durationTime: number) => void
+  updateCurrent: (currentTime: number) => void
+  updateProgress: (progress: number) => void
+  updateIsPlaying: (isPlaying: boolean) => void
+  togglePlay: () => void
+}
 
 const defaultState: AudioPlayerState = {
-  duration: 0,
-  isPlaying: false,
+  durationTime: 0,
+  currentTime: 0,
   progress: 0,
-  currentTrackIndex: null,
-};
+  isPlaying: false,
+}
 
 export const createAudioPlayerStore = () =>
   create<AudioPlayerStore>((set, get) => ({
     ...defaultState,
-    updateDuration: (duration) => set({ ...get(), duration }),
-    updateIsPlaying: (isPlaying) => set({ ...get(), isPlaying }),
-    updateProgress: (progress) => set({ ...get(), progress }),
+    updateCurrent: currentTime => set({ ...get(), currentTime }),
+    updateDuration: durationTime => set({ ...get(), durationTime }),
+    updateIsPlaying: isPlaying => set({ ...get(), isPlaying }),
+    updateProgress: progress => set({ ...get(), progress }),
     togglePlay: () => set({ ...get(), isPlaying: !get().isPlaying }),
-    setCurrentTrackIndex: (index) =>
-      set({ ...get(), currentTrackIndex: index }),
-  }));
+  }))
