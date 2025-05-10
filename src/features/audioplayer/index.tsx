@@ -51,7 +51,7 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
 
   const animate = () => {
     if (isPlaying && discRef.current) {
-      rotateRef.current = rotateRef.current + 0.5
+      rotateRef.current += 0.5
       discRef.current.style.setProperty('--rotation', `${rotateRef.current}deg`)
     }
     animationRef.current = requestAnimationFrame(animate)
@@ -83,7 +83,6 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const handleResume = () => {
     if (!audioRef.current) return
     if (!isPlaying) {
-      console.log('Starting animation')
       scrollTo()
       audioRef.current.play()
       updateIsPlaying(true)
@@ -149,10 +148,10 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
           [styles.current]: isActive,
         })}>
         <img
+          alt='Disc'
           ref={discRef}
-          src={`${BASE_URL}/disc/${trackIndex + 1}.png`}
-          alt="Disc"
           className={styles.disc_image}
+          src={`${BASE_URL}/disc/${trackIndex + 1}.png`}
         />
       </div>
       <div
