@@ -91,6 +91,15 @@ const HomePage = () => {
         </section>
       </div>
 
+      <section className={style.img_wrapper}>
+        <div
+          className={style.static_img}
+          style={{
+            backgroundImage: `url(${BASE_URL}/cover/)`,
+          }}
+        />
+      </section>
+
       {/* Right Pull Tab */}
       <div className={style.pull_tab} onClick={toggleRightPopup}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

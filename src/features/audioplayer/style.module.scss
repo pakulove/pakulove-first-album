@@ -12,40 +12,46 @@
   position: relative;
   z-index: 1;
 
-  &.current {
+  &.playing {
     border-color: white;
   }
 }
 
 .wrapper {
   position: relative;
-  flex: 1 1 0;
   height: 100%;
 }
 
 .disc_image {
-  position: absolute;
-  top: 50%;
   display: inline-block;
-  left: 0;
-  width: max-content;
   height: 50%;
-  scale: 1.1;
-  transform: translateY(-50%);
-  transition: transform 0.6s ease-in-out;
+  scale: 1.3;
   pointer-events: none;
   object-fit: contain;
-  animation-play-state: paused;
-  animation: none;
   z-index: 0;
-  transform: translateX(50%) translateY(-50%) rotate(var(--rotation, 0deg));
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   clip-path: circle(50% at 50% 50%);
+  transform-origin: center;
+  will-change: transform;
+  transform: rotate(var(--rotation, 0deg)) !important;
+}
 
-  &.playing {
-    animation: rotate 10s linear infinite;
-    transform: translateX(150%) translateY(-50%);
+.disc_image_wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateX(50%) translateY(-50%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  height: 100%;
+  width: max-content;
+  filter: drop-shadow(3px 3px 3px black);
+
+  &.current {
+    transform: translateX(155%) translateY(-50%);
   }
-
 }
 
 .cover_image {

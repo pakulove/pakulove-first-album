@@ -1,6 +1,5 @@
 .home_container {
   display: flex;
-  gap: 3rem;
   position: relative;
 }
 
@@ -34,7 +33,8 @@
   max-height: 100vh;
   flex-direction: column;
   gap: 2rem;
-  width: 100%;
+  padding: 0 10rem 0 3rem;
+  width: max-content;
   overflow-y: auto;
   &::after {
     pointer-events: none;
@@ -62,7 +62,6 @@
 
 .wrapper {
   position: relative;
-  width: 100%;
 }
 
 .pull_tab {

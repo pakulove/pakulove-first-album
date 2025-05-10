@@ -39,12 +39,39 @@ export const AudioPlayer: FC<AudioPlayerProps> = props => {
 export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const audioRef = useRef<HTMLAudioElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const discRef = useRef<HTMLImageElement>(null)
+  const rotateRef = useRef<number>(0)
+  const animationRef = useRef<number>(0)
   const { title, prod, coverUrl, onStarted, onEnded, isActive, trackIndex, ...htmlProps } = props
 
   const { progress, isPlaying, currentTime, durationTime, updateIsPlaying } =
     useStrictContext(audioStoreContext)
 
   const progressBar = useProgressBar(audioRef)
+
+  const animate = () => {
+    if (isPlaying && discRef.current) {
+      rotateRef.current = rotateRef.current + 0.5
+      discRef.current.style.setProperty('--rotation', `${rotateRef.current}deg`)
+    }
+    animationRef.current = requestAnimationFrame(animate)
+  }
+
+  useEffect(() => {
+    if (isPlaying) {
+      animationRef.current = requestAnimationFrame(animate)
+    } else {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [isPlaying])
 
   const scrollTo = () => {
     containerRef.current?.scrollIntoView({
@@ -56,6 +83,7 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const handleResume = () => {
     if (!audioRef.current) return
     if (!isPlaying) {
+      console.log('Starting animation')
       scrollTo()
       audioRef.current.play()
       updateIsPlaying(true)
@@ -73,6 +101,10 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
       audioRef.current.pause()
       updateIsPlaying(false)
     }
+  }
+
+  const handleTimeUpdate = () => {
+    progressBar.onTimeUpdate()
   }
 
   const handleEnd = () => {
@@ -112,17 +144,21 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
 
   return (
     <div className={styles.wrapper}>
-      <img
-        src={`${BASE_URL}/disc/${trackIndex + 1}.png`}
-        alt="Disc"
-        className={cn(styles.disc_image, {
-          [styles.playing]: isPlaying,
-        })}
-      />
+      <div
+        className={cn(styles.disc_image_wrapper, {
+          [styles.current]: isActive,
+        })}>
+        <img
+          ref={discRef}
+          src={`${BASE_URL}/disc/${trackIndex + 1}.png`}
+          alt="Disc"
+          className={styles.disc_image}
+        />
+      </div>
       <div
         ref={containerRef}
         className={cn(styles.player_container, {
-          [styles.current]: isActive,
+          [styles.playing]: isActive,
         })}>
         <img src={coverUrl} alt={`Cover for ${title}`} className={styles.cover_image} />
         <h1 className={styles.player_title}>{title}</h1>
@@ -153,7 +189,7 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
           ref={audioRef}
           data-index={title}
           onEnded={handleEnd}
-          onTimeUpdate={progressBar.onTimeUpdate}
+          onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={progressBar.onLoadMetadata}
         />
       </div>
