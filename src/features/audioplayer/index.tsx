@@ -1,3 +1,4 @@
+import { BASE_URL } from '@shared/api/base'
 import { useStrictContext } from '@shared/lib/react'
 import cn from 'classnames'
 import { useEffect, useRef, type FC } from 'react'
@@ -15,6 +16,7 @@ type AudioPlayerProps = React.DetailedHTMLProps<
   onStarted: () => void
   onEnded: () => void
   isActive: boolean
+  trackIndex: number
 }
 
 const formatTime = (seconds: number) => {
@@ -37,7 +39,7 @@ export const AudioPlayer: FC<AudioPlayerProps> = props => {
 export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const audioRef = useRef<HTMLAudioElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { title, prod, coverUrl, onStarted, onEnded, isActive, ...htmlProps } = props
+  const { title, prod, coverUrl, onStarted, onEnded, isActive, trackIndex, ...htmlProps } = props
 
   const { progress, isPlaying, currentTime, durationTime, updateIsPlaying } =
     useStrictContext(audioStoreContext)
@@ -60,17 +62,17 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
     }
   }
 
+  const handlePlay = () => {
+    handleResume()
+    onStarted()
+  }
+
   const handlePause = () => {
     if (!audioRef.current) return
     if (isPlaying) {
       audioRef.current.pause()
       updateIsPlaying(false)
     }
-  }
-
-  const handlePlay = () => {
-    handleResume()
-    onStarted()
   }
 
   const handleEnd = () => {
@@ -100,7 +102,6 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
     }
   }
 
-  //TODO GET RID PZH
   useEffect(() => {
     if (isActive) {
       handlePlay()
@@ -110,36 +111,52 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   }, [isActive])
 
   return (
-    <div ref={containerRef} className={cn(styles.player_container, { [styles.current]: isActive })}>
-      <img src={coverUrl} alt={`Cover for ${title}`} className={styles.cover_image} />
-      <h1 className={styles.player_title}>{title}</h1>
-      <p className={styles.player_production}>prod. by {prod}</p>
-      <button className={styles.play_button} onClick={togglePlay}>
-        {isPlaying ? '⏸' : '▶'}
-      </button>
-      <div className={styles.progress_container}>
-        <div
-          className={styles.progress_bar}
-          style={{ cursor: isActive ? 'pointer' : 'auto' }}
-          onClick={handleProgressBarClick}>
-          <div
-            className={cn(styles.progress, { [styles.progress_active]: isActive })}
-            style={{ width: isActive ? `${progress}%` : '0%' }}
-          />
-        </div>
-        <div className={styles.time_display}>
-          <span>{formatTime(currentTime)} </span>
-          <span>{formatTime(durationTime)}</span>
-        </div>
-      </div>
-      <audio
-        {...htmlProps}
-        ref={audioRef}
-        data-index={title}
-        onEnded={handleEnd}
-        onTimeUpdate={progressBar.onTimeUpdate}
-        onLoadedMetadata={progressBar.onLoadMetadata}
+    <div className={styles.wrapper}>
+      <img
+        src={`${BASE_URL}/disc/${trackIndex + 1}.png`}
+        alt="Disc"
+        className={cn(styles.disc_image, {
+          [styles.playing]: isPlaying,
+        })}
       />
+      <div
+        ref={containerRef}
+        className={cn(styles.player_container, {
+          [styles.current]: isActive,
+        })}>
+        <img src={coverUrl} alt={`Cover for ${title}`} className={styles.cover_image} />
+        <h1 className={styles.player_title}>{title}</h1>
+        <p className={styles.player_production}>prod. by {prod}</p>
+        <button className={styles.play_button} onClick={togglePlay}>
+          {isPlaying ? '⏸' : '▶'}
+        </button>
+        <div className={styles.progress_container}>
+          <div
+            className={styles.progress_bar}
+            style={{ cursor: isActive ? 'pointer' : 'auto' }}
+            onClick={handleProgressBarClick}>
+            <div
+              className={cn(styles.progress, {
+                [styles.progress_active]: isActive,
+              })}
+              style={{ width: isActive ? `${progress}%` : '0%' }}
+            />
+          </div>
+          <div className={styles.time_display}>
+            <span>{formatTime(currentTime)} </span>
+            <span>{formatTime(durationTime)}</span>
+          </div>
+        </div>
+
+        <audio
+          {...htmlProps}
+          ref={audioRef}
+          data-index={title}
+          onEnded={handleEnd}
+          onTimeUpdate={progressBar.onTimeUpdate}
+          onLoadedMetadata={progressBar.onLoadMetadata}
+        />
+      </div>
     </div>
   )
 }
