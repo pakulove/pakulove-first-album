@@ -11,6 +11,8 @@ const trackExists = (index: number, tracks: unknown[]) => index < tracks.length
 const HomePage = () => {
   const [isRightPopupVisible, setIsRightPopupVisible] = useState(false)
   const [isLeftPopupVisible, setIsLeftPopupVisible] = useState(true)
+  const [isFlipped, setIsFlipped] = useState(false)
+  const [currentImage, setCurrentImage] = useState('cover.png')
   const rightPopupContentRef = useRef<HTMLDivElement>(null)
   const leftPopupContentRef = useRef<HTMLDivElement>(null)
 
@@ -49,6 +51,14 @@ const HomePage = () => {
     setIsLeftPopupVisible(false)
 
     data && updateActiveTrack(data[0])
+  }
+
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped)
+    // Задержка для смены изображения в середине анимации
+    setTimeout(() => {
+      setCurrentImage(isFlipped ? 'cover.png' : 'reverse.png')
+    }, 400) // Половина времени анимации (0.8s / 2)
   }
 
   useEffect(() => {
@@ -95,20 +105,39 @@ const HomePage = () => {
       </div>
 
       <section className={style.img_wrapper}>
-        <div className={style.static_img} style={{ backgroundImage: `url(${BASE_URL}/cover/)` }} />
+        <div
+          className={`${style.static_img} ${isFlipped ? style.flipped : ''}`}
+          style={
+            {
+              '--front-image': `url(${BASE_URL}/cover/cover.png)`,
+              '--back-image': `url(${BASE_URL}/cover/reverse.png)`,
+            } as React.CSSProperties
+          }
+        />
+        <button
+          className={style.flip_button}
+          onClick={() => setIsFlipped(!isFlipped)}
+          title="Перевернуть обложку">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path
+              d="M7.11 8.53L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 5.32c1.16.9 2.51 1.44 3.9 1.61V17.9c-.87-.15-1.71-.49-2.46-1.03L7.1 18.32zM13 4.07V1L8.45 5.55 13 10V6.09c2.84.48 5 2.94 5 5.91s-2.16 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93s-3.05-7.44-7-7.93z"
+              fill="white"
+            />
+          </svg>
+        </button>
       </section>
 
       {/* Right Pull Tab */}
       <div className={style.pull_tab} onClick={toggleRightPopup}>
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-          <path d='M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z' />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
         </svg>
       </div>
 
       {/* Left Pull Tab */}
       <div className={`${style.pull_tab} ${style.left}`} onClick={toggleLeftPopup}>
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-          <path d='M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z' />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
         </svg>
       </div>
 
@@ -120,7 +149,7 @@ const HomePage = () => {
               <img
                 className={style.popup_img}
                 src={`${BASE_URL}/cover/cover.png`}
-                alt='Front cover'
+                alt="Front cover"
               />
               <span className={style.side_label}>лицевая сторона</span>
             </div>
@@ -133,13 +162,13 @@ const HomePage = () => {
                 height: '11rem',
                 objectFit: 'contain',
               }}
-              alt='disks'
+              alt="disks"
             />
             <div className={style.cover_side}>
               <img
                 className={style.popup_img}
                 src={`${BASE_URL}/cover/reverse.png`}
-                alt='Back cover'
+                alt="Back cover"
               />
               <span className={style.side_label}>оборотная сторона</span>
             </div>
@@ -152,8 +181,8 @@ const HomePage = () => {
         <div className={style.popup_content} ref={leftPopupContentRef}>
           <h2 className={style.popup_title}>skeesh - цсмж ч.1</h2>
           <button className={style.play_all_button} onClick={playFirstTrack}>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
-              <path d='M8 5v14l11-7z' />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
             </svg>
             прикоснуться
           </button>

@@ -1,9 +1,9 @@
-# Logs
+ненене# Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+yarn-error.log*не
 pnpm-debug.log*
 lerna-debug.log*
 
@@ -17,7 +17,7 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
-*.suo
+*.suoА, теперь понятно - анимация не запускается. Проблема в том, что мы не инициализируем анимацию при монтировании компонента. Давайте добавим useEffect для запуска анимации:А, теперь понятно - анимация не запускается. Проблема в том, что мы не инициализируем анимацию при монтировании компонента. Давайте добавим useEffect для запуска анимации:
 *.ntvs*
 *.njsproj
 *.sln

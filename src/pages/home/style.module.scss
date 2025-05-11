@@ -13,6 +13,7 @@
   align-items: center;
   height: 100vh;
   overflow: hidden;
+  perspective: 1000px;
 }
 
 .static_img {
@@ -26,6 +27,39 @@
   object-fit: contain;
   position: relative;
   z-index: 5;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: rotateY(0deg);
+  backface-visibility: hidden;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 22px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    backface-visibility: hidden;
+  }
+
+  &::before {
+    background-image: var(--front-image);
+    transform: rotateY(0deg);
+  }
+
+  &::after {
+    background-image: var(--back-image);
+    transform: rotateY(180deg);
+  }
+
+  &.flipped {
+    transform: rotateY(180deg);
+  }
 }
 
 .track_list {
@@ -198,4 +232,38 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.flip_button {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1) rotate(180deg);
+  }
+
+  &:active {
+    transform: scale(0.95) rotate(180deg);
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: white;
+    transition: transform 0.3s ease;
+  }
 }
