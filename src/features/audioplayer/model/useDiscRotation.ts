@@ -1,6 +1,6 @@
 import { useStrictContext } from '@shared/lib/react'
 import { useEffect, useRef } from 'react'
-import { audioStoreContext } from '../audiostoreprovider'
+import { audioStoreContext } from '../ui/audio-store-provider'
 
 export const useDiscRotation = () => {
   const discRef = useRef<HTMLImageElement>(null)

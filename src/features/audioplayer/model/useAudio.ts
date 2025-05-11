@@ -1,23 +1,15 @@
 import { useStrictContext } from '@shared/lib/react'
 import { useEffect, useRef } from 'react'
-import { audioStoreContext } from '../audiostoreprovider'
+import { useAudioPlayerDeps } from '../deps'
+import { audioStoreContext } from '../ui/audio-store-provider'
 import { useProgressBar } from './useProgressBar'
 
 const isTrackOver = (progress: number) => progress === 100
 
-export type AudioPlayerOptions = {
-  title: string
-  productBy: string
-  coverURL: string
-  onStart: () => void
-  onEnd: () => void
-  isActive: boolean
-  trackIndex: number
-}
-
-export const useAudio = (props: AudioPlayerOptions) => {
+export const useAudio = () => {
   const audioRef = useRef<HTMLAudioElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const audioDeps = useAudioPlayerDeps()
 
   const { progress, isPlaying, updateIsPlaying } = useStrictContext(audioStoreContext)
 
@@ -41,7 +33,7 @@ export const useAudio = (props: AudioPlayerOptions) => {
 
   const handlePlay = () => {
     handleResume()
-    props.onStart()
+    audioDeps.onStart()
   }
 
   const handlePause = () => {
@@ -55,7 +47,7 @@ export const useAudio = (props: AudioPlayerOptions) => {
   const handleEnd = () => {
     if (!audioRef.current) return
     handlePause()
-    isTrackOver(progress) && props.onEnd()
+    isTrackOver(progress) && audioDeps.onEnd()
     progressBarHandlers.onEnded()
     audioRef.current.currentTime = 0
   }
@@ -64,7 +56,7 @@ export const useAudio = (props: AudioPlayerOptions) => {
     if (isPlaying) {
       handlePause()
     } else {
-      if (props.isActive) handleResume()
+      if (audioDeps.isActive) handleResume()
       else handlePlay()
     }
   }
@@ -75,12 +67,12 @@ export const useAudio = (props: AudioPlayerOptions) => {
   }
 
   useEffect(() => {
-    if (props.isActive) {
+    if (audioDeps.isActive) {
       handlePlay()
     } else {
       handleEnd()
     }
-  }, [props.isActive])
+  }, [audioDeps.isActive])
 
   return [
     audioRef,

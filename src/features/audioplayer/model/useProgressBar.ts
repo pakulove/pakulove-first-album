@@ -1,5 +1,5 @@
 import { useStrictContext } from '@shared/lib/react'
-import { audioStoreContext } from '../audiostoreprovider'
+import { audioStoreContext } from '../ui/audio-store-provider'
 
 export const useProgressBar = (audioRef: React.RefObject<HTMLAudioElement | null>) => {
   const { updateProgress, updateDuration, updateCurrent, updateIsPlaying, isPlaying } =

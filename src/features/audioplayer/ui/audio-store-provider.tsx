@@ -1,6 +1,6 @@
 import { createStrictContext } from '@shared/lib/react'
 import { useState, type FC, type PropsWithChildren } from 'react'
-import { createAudioPlayerStore, type AudioPlayerStore } from './model/store'
+import { createAudioPlayerStore, type AudioPlayerStore } from '../model/store'
 
 export const audioStoreContext = createStrictContext<AudioPlayerStore>()
 
