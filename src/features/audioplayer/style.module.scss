@@ -31,6 +31,7 @@
   z-index: 0;
   transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   clip-path: circle(50% at 50% 50%);
+  user-select: none;
   transform-origin: center;
   will-change: transform;
   transform: rotate(var(--rotation, 0deg));
