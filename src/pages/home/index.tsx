@@ -13,12 +13,39 @@ const HomePage = () => {
   const [isLeftPopupVisible, setIsLeftPopupVisible] = useState(true)
   const [isFlipped, setIsFlipped] = useState(false)
   const [currentImage, setCurrentImage] = useState('cover.png')
+  const [isImageChanged, setIsImageChanged] = useState(false)
   const rightPopupContentRef = useRef<HTMLDivElement>(null)
   const leftPopupContentRef = useRef<HTMLDivElement>(null)
+  const animationTimeoutRef = useRef<NodeJS.Timeout>(null)
 
   const audioListRef = useRef<HTMLDivElement>(null)
   const { activeTrack, updateActiveTrack } = useActiveTrackStore()
   const { data, isLoading, isError, error } = useQuery(tracksQueryOptions)
+
+  const preloadImages = (track: TTrack) => {
+    // Предзагружаем все изображения из picturesAtTime
+    track.picturesAtTime.forEach(pic => {
+      const img = new Image()
+      img.src = `${BASE_URL}/cover/${pic.name}`
+    })
+    // Предзагружаем reverse.png
+    const reverseImg = new Image()
+    reverseImg.src = `${BASE_URL}/cover/reverse.png`
+  }
+
+  // Предзагрузка при монтировании компонента
+  useEffect(() => {
+    if (data) {
+      data.forEach(track => preloadImages(track))
+    }
+  }, [data])
+
+  // Предзагрузка при смене активного трека
+  useEffect(() => {
+    if (activeTrack) {
+      preloadImages(activeTrack)
+    }
+  }, [activeTrack])
 
   const getPlayerProps: (track: TTrack, index: number) => AudioPlayerProps = (track, index) => ({
     coverURL: track.coverURL,
@@ -86,6 +113,57 @@ const HomePage = () => {
     }
   }, [isRightPopupVisible, isLeftPopupVisible])
 
+  // Сброс анимации при размонтировании
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Сброс анимации при смене трека
+  useEffect(() => {
+    setIsImageChanged(false)
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
+  }, [activeTrack])
+
+  useEffect(() => {
+    if (activeTrack) {
+      const audioElement = document.querySelector(
+        `audio[data-index="${activeTrack.title}"]`
+      ) as HTMLAudioElement
+      if (audioElement) {
+        const handleTimeUpdate = () => {
+          const currentTime = Math.floor(audioElement.currentTime)
+          const picture = activeTrack.picturesAtTime.find(pic => pic.second === currentTime)
+          if (picture) {
+            setIsImageChanged(true)
+            setCurrentImage(picture.name)
+            // Сбрасываем предыдущий таймаут если он есть
+            if (animationTimeoutRef.current) {
+              clearTimeout(animationTimeoutRef.current)
+            }
+            // Устанавливаем новый таймаут
+            animationTimeoutRef.current = setTimeout(() => {
+              setIsImageChanged(false)
+            }, 500)
+          }
+        }
+
+        audioElement.addEventListener('timeupdate', handleTimeUpdate)
+        return () => {
+          audioElement.removeEventListener('timeupdate', handleTimeUpdate)
+          if (animationTimeoutRef.current) {
+            clearTimeout(animationTimeoutRef.current)
+          }
+        }
+      }
+    }
+  }, [activeTrack])
+
   if (isLoading) {
     return <div>Loading playlist...</div>
   }
@@ -106,10 +184,12 @@ const HomePage = () => {
 
       <section className={style.img_wrapper}>
         <div
-          className={`${style.static_img} ${isFlipped ? style.flipped : ''}`}
+          className={`${style.static_img} ${isFlipped ? style.flipped : ''} ${
+            isImageChanged ? style.image_changed : ''
+          }`}
           style={
             {
-              '--front-image': `url(${BASE_URL}/cover/cover.png)`,
+              '--front-image': `url(${BASE_URL}/cover/${currentImage})`,
               '--back-image': `url(${BASE_URL}/cover/reverse.png)`,
             } as React.CSSProperties
           }
@@ -126,68 +206,6 @@ const HomePage = () => {
           </svg>
         </button>
       </section>
-
-      {/* Right Pull Tab */}
-      <div className={style.pull_tab} onClick={toggleRightPopup}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-        </svg>
-      </div>
-
-      {/* Left Pull Tab */}
-      <div className={`${style.pull_tab} ${style.left}`} onClick={toggleLeftPopup}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-        </svg>
-      </div>
-
-      {/* Right Popup - Album Cover */}
-      <div className={`${style.popup_overlay} ${isRightPopupVisible ? style.visible : ''}`}>
-        <div className={style.popup_content} ref={rightPopupContentRef}>
-          <div className={style.popup_img_wrapper}>
-            <div className={style.cover_side}>
-              <img
-                className={style.popup_img}
-                src={`${BASE_URL}/cover/cover.png`}
-                alt="Front cover"
-              />
-              <span className={style.side_label}>лицевая сторона</span>
-            </div>
-            <img
-              className={style.popup_img}
-              src={`${BASE_URL}/cover/disks.png`}
-              style={{
-                verticalAlign: 'center',
-                width: '18rem',
-                height: '11rem',
-                objectFit: 'contain',
-              }}
-              alt="disks"
-            />
-            <div className={style.cover_side}>
-              <img
-                className={style.popup_img}
-                src={`${BASE_URL}/cover/reverse.png`}
-                alt="Back cover"
-              />
-              <span className={style.side_label}>оборотная сторона</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Left Popup - Album Info */}
-      <div className={`${style.popup_overlay} ${isLeftPopupVisible ? style.visible : ''}`}>
-        <div className={style.popup_content} ref={leftPopupContentRef}>
-          <h2 className={style.popup_title}>skeesh - цсмж ч.1</h2>
-          <button className={style.play_all_button} onClick={playFirstTrack}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            прикоснуться
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

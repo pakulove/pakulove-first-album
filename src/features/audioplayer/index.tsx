@@ -30,7 +30,6 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
     <div className={styles.wrapper}>
       <div className={cn(styles.disc_image_wrapper, { [styles.current]: isActive })}>
         <img
-          alt='Disc'
           ref={discRef}
           className={styles.disc_image}
           src={`${BASE_URL}/disc/${trackIndex + 1}.png`}
@@ -39,7 +38,7 @@ export const AudioPlayerContent: FC<AudioPlayerProps> = props => {
       <div
         ref={containerRef}
         className={cn(styles.player_container, { [styles.playing]: isActive })}>
-        <img src={coverURL} alt={`Cover for ${title}`} className={styles.cover_image} />
+        <img src={coverURL} className={styles.cover_image} />
         <h1 className={styles.player_title}>{title}</h1>
         <p className={styles.player_production}>prod. by {productBy}</p>
         <button className={styles.play_button} onClick={togglePlay}>
