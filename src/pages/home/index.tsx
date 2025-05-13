@@ -23,10 +23,11 @@ const HomePage = () => {
   const { data, isLoading, isError, error } = useQuery(tracksQueryOptions)
 
   const preloadImages = (track: TTrack) => {
-    // Предзагружаем все изображения из picturesAtTime
     track.picturesAtTime.forEach(pic => {
-      const img = new Image()
-      img.src = `${BASE_URL}/cover/${pic.name}`
+      if (pic.name !== 'default') {
+        const img = new Image()
+        img.src = `${BASE_URL}/cover/${pic.name}`
+      }
     })
     // Предзагружаем reverse.png
     const reverseImg = new Image()
@@ -131,7 +132,7 @@ const HomePage = () => {
           const picture = activeTrack.picturesAtTime.find(pic => pic.second === currentTime)
           if (picture) {
             setIsImageChanged(true)
-            setCurrentImage(picture.name)
+            setCurrentImage(picture.name === 'default' ? 'cover.png' : picture.name)
             // Сбрасываем предыдущий таймаут если он есть
             if (animationTimeoutRef.current) {
               clearTimeout(animationTimeoutRef.current)

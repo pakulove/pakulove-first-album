@@ -73,7 +73,7 @@
   }
 
   &.image_changed::before {
-    animation: imageAppear 0.5s ease forwards;
+    animation: imageAppear 0.4s ease-in-out forwards;
   }
 }
 
