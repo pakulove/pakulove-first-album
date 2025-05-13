@@ -1,7 +1,8 @@
 import { tracksQueryOptions, type TTrack } from '@entities/track'
-import { AudioPlayer, type AudioPlayerProps } from '@features/audioplayer'
+import { AudioPlayer, audioPlayerDepsContext, type AudioPlayerDeps } from '@features/audioplayer'
 import { BASE_URL } from '@shared/api/base'
 import { useQuery } from '@tanstack/react-query'
+import cn from 'classnames'
 import { useEffect, useRef, useState } from 'react'
 import { useActiveTrackStore } from './store'
 import style from './style.module.scss'
@@ -47,11 +48,11 @@ const HomePage = () => {
     }
   }, [activeTrack])
 
-  const getPlayerProps: (track: TTrack, index: number) => AudioPlayerProps = (track, index) => ({
+  const getPlayerDeps: (track: TTrack, index: number) => AudioPlayerDeps = (track, index) => ({
     coverURL: track.coverURL,
     productBy: track.productBy,
     title: track.title,
-    src: track.url,
+    discURL: track.discURL,
     trackIndex: index,
     isActive: activeTrack?.url === track.url,
     onStart: () => {
@@ -63,16 +64,6 @@ const HomePage = () => {
       }
     },
   })
-
-  const toggleRightPopup = () => {
-    setIsRightPopupVisible(!isRightPopupVisible)
-    setIsLeftPopupVisible(false)
-  }
-
-  const toggleLeftPopup = () => {
-    setIsLeftPopupVisible(!isLeftPopupVisible)
-    setIsRightPopupVisible(false)
-  }
 
   const playFirstTrack = () => {
     setIsLeftPopupVisible(false)
@@ -177,7 +168,11 @@ const HomePage = () => {
       <div className={style.wrapper}>
         <section ref={audioListRef} className={style.track_list}>
           {data?.map((track, index) => (
-            <AudioPlayer key={track.title} {...getPlayerProps(track, index)} />
+            <audioPlayerDepsContext.Provider
+              key={track.title}
+              value={{ ...getPlayerDeps(track, index) }}>
+              <AudioPlayer src={track.url} />
+            </audioPlayerDepsContext.Provider>
           ))}
         </section>
       </div>

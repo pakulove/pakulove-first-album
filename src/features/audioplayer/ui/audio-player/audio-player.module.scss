@@ -22,39 +22,6 @@
   height: 100%;
 }
 
-.disc_image {
-  display: inline-block;
-  height: 50%;
-  scale: 1.3;
-  pointer-events: none;
-  object-fit: contain;
-  z-index: 0;
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  clip-path: circle(50% at 50% 50%);
-  user-select: none;
-  transform-origin: center;
-  will-change: transform;
-  transform: rotate(var(--rotation, 0deg));
-}
-
-.disc_image_wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateX(50%) translateY(-50%);
-  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
-  height: 100%;
-  width: max-content;
-  filter: drop-shadow(3px 3px 3px black);
-
-  &.current {
-    transform: translateX(155%) translateY(-50%);
-  }
-}
-
 .cover_image {
   width: 200px;
   height: 200px;
