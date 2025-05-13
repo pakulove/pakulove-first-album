@@ -27,6 +27,17 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const { currentTime, durationTime, isPlaying, progress } = useStrictContext(audioStoreContext)
   const { isActive, coverURL, productBy, title } = useAudioPlayerDeps()
 
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
+    const audio = e.currentTarget
+    const progressBar = audio.parentElement?.querySelector(`.${styles.progress}`) as HTMLElement
+    if (progressBar) {
+      progressBar.style.width = '0%'
+    }
+    if (audioHandlers.onLoadedMetadata) {
+      audioHandlers.onLoadedMetadata()
+    }
+  }
+
   return (
     <div className={styles.wrapper}>
       <RotatingDisc />
@@ -54,7 +65,13 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
             <Timer time={durationTime} />
           </div>
         </div>
-        <audio {...props} {...audioHandlers} ref={audioRef} data-index={title} />
+        <audio
+          {...props}
+          {...audioHandlers}
+          onLoadedMetadata={handleLoadedMetadata}
+          ref={audioRef}
+          data-index={title}
+        />
       </div>
     </div>
   )
