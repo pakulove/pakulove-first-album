@@ -24,7 +24,7 @@ export const useProgressBar = (audioRef: React.RefObject<HTMLAudioElement | null
   }
 
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current || !isPlaying) return
+    if (!audioRef.current) return
     const progressBar = e.currentTarget
     const rect = progressBar.getBoundingClientRect()
     const clickPosition = e.clientX - rect.left

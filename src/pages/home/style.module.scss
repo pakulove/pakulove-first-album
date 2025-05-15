@@ -96,6 +96,8 @@
   padding: 0 10rem 0 3rem;
   width: max-content;
   overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  
   &::after {
     pointer-events: none;
     content: '';
@@ -292,4 +294,9 @@
     fill: white;
     transition: transform 0.3s ease;
   }
+}
+
+.track_item {
+  cursor: pointer;
+  scroll-snap-align: center;
 }

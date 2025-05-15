@@ -25,7 +25,7 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const [audioRef, containerRef, handlers] = useAudio()
   const { handlePlay, togglePlay, handleProgressBarClick, ...audioHandlers } = handlers
   const { currentTime, durationTime, isPlaying, progress } = useStrictContext(audioStoreContext)
-  const { isActive, coverURL, productBy, title } = useAudioPlayerDeps()
+  const { isActive, coverURL, productBy, title, trackIndex } = useAudioPlayerDeps()
 
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
     const audio = e.currentTarget
@@ -54,10 +54,11 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
           <div
             className={styles.progress_bar}
             style={{ cursor: isActive ? 'pointer' : 'auto' }}
-            onClick={handleProgressBarClick}>
+            onClick={isActive ? handleProgressBarClick : undefined}>
             <div
-              className={cn(styles.progress, { [styles.progress_active]: isActive })}
+              className={styles.progress}
               style={{ width: isActive ? `${progress}%` : '0%' }}
+              data-track-index={trackIndex}
             />
           </div>
           <div className={styles.time_display}>

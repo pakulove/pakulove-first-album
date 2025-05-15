@@ -9,13 +9,9 @@ import style from './style.module.scss'
 const trackExists = (index: number, tracks: unknown[]) => index < tracks.length
 
 const HomePage = () => {
-  const [isRightPopupVisible, setIsRightPopupVisible] = useState(false)
-  const [isLeftPopupVisible, setIsLeftPopupVisible] = useState(true)
   const [isFlipped, setIsFlipped] = useState(false)
   const [currentImage, setCurrentImage] = useState('cover.png')
   const [isImageChanged, setIsImageChanged] = useState(false)
-  const rightPopupContentRef = useRef<HTMLDivElement>(null)
-  const leftPopupContentRef = useRef<HTMLDivElement>(null)
   const animationTimeoutRef = useRef<NodeJS.Timeout>(null)
 
   const audioListRef = useRef<HTMLDivElement>(null)
@@ -23,6 +19,7 @@ const HomePage = () => {
   const { data, isLoading, isError, error } = useQuery(tracksQueryOptions)
 
   const preloadImages = (track: TTrack) => {
+    // Предзагружаем все изображения из picturesAtTime, кроме default
     track.picturesAtTime.forEach(pic => {
       if (pic.name !== 'default') {
         const img = new Image()
@@ -48,6 +45,23 @@ const HomePage = () => {
     }
   }, [activeTrack])
 
+  // Скроллинг к активному треку
+  useEffect(() => {
+    if (activeTrack && audioListRef.current) {
+      const activeElement = document
+        .querySelector(`[data-index="${activeTrack.title}"]`)
+        ?.closest('div')
+      if (activeElement) {
+        setTimeout(() => {
+          activeElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          })
+        }, 100)
+      }
+    }
+  }, [activeTrack])
+
   const getPlayerDeps: (track: TTrack, index: number) => AudioPlayerDeps = (track, index) => ({
     coverURL: track.coverURL,
     productBy: track.productBy,
@@ -65,62 +79,6 @@ const HomePage = () => {
     },
   })
 
-  const playFirstTrack = () => {
-    setIsLeftPopupVisible(false)
-
-    data && updateActiveTrack(data[0])
-  }
-
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped)
-    // Задержка для смены изображения в середине анимации
-    setTimeout(() => {
-      setCurrentImage(isFlipped ? 'cover.png' : 'reverse.png')
-    }, 400) // Половина времени анимации (0.8s / 2)
-  }
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        rightPopupContentRef.current &&
-        !rightPopupContentRef.current.contains(event.target as Node) &&
-        isRightPopupVisible
-      ) {
-        setIsRightPopupVisible(false)
-      }
-
-      if (
-        leftPopupContentRef.current &&
-        !leftPopupContentRef.current.contains(event.target as Node) &&
-        isLeftPopupVisible
-      ) {
-        setIsLeftPopupVisible(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isRightPopupVisible, isLeftPopupVisible])
-
-  // Сброс анимации при размонтировании
-  useEffect(() => {
-    return () => {
-      if (animationTimeoutRef.current) {
-        clearTimeout(animationTimeoutRef.current)
-      }
-    }
-  }, [])
-
-  // Сброс анимации при смене трека
-  useEffect(() => {
-    setIsImageChanged(false)
-    if (animationTimeoutRef.current) {
-      clearTimeout(animationTimeoutRef.current)
-    }
-  }, [activeTrack])
-
   useEffect(() => {
     if (activeTrack) {
       const audioElement = document.querySelector(
@@ -132,6 +90,7 @@ const HomePage = () => {
           const picture = activeTrack.picturesAtTime.find(pic => pic.second === currentTime)
           if (picture) {
             setIsImageChanged(true)
+            // Если пришло слово default, используем cover.png
             setCurrentImage(picture.name === 'default' ? 'cover.png' : picture.name)
             // Сбрасываем предыдущий таймаут если он есть
             if (animationTimeoutRef.current) {
@@ -142,9 +101,10 @@ const HomePage = () => {
               setIsImageChanged(false)
             }, 500)
           }
-        }
+        }   
 
         audioElement.addEventListener('timeupdate', handleTimeUpdate)
+
         return () => {
           audioElement.removeEventListener('timeupdate', handleTimeUpdate)
           if (animationTimeoutRef.current) {
@@ -154,6 +114,17 @@ const HomePage = () => {
       }
     }
   }, [activeTrack])
+
+  // Обрабатываем клик по контейнеру трека
+  const handleTrackClick = (event: React.MouseEvent<HTMLElement>, track: TTrack) => {
+    const targetElement = event.currentTarget
+    if (targetElement) {
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }
+  }
 
   if (isLoading) {
     return <div>Loading playlist...</div>
@@ -168,11 +139,14 @@ const HomePage = () => {
       <div className={style.wrapper}>
         <section ref={audioListRef} className={style.track_list}>
           {data?.map((track, index) => (
-            <audioPlayerDepsContext.Provider
+            <div
               key={track.title}
-              value={{ ...getPlayerDeps(track, index) }}>
-              <AudioPlayer src={track.url} />
-            </audioPlayerDepsContext.Provider>
+              onClick={e => handleTrackClick(e, track)}
+              className={style.track_item}>
+              <audioPlayerDepsContext.Provider value={{ ...getPlayerDeps(track, index) }}>
+                <AudioPlayer src={track.url} />
+              </audioPlayerDepsContext.Provider>
+            </div>
           ))}
         </section>
       </div>
