@@ -116,7 +116,7 @@ const HomePage = () => {
   }, [activeTrack])
 
   // Обрабатываем клик по контейнеру трека
-  const handleTrackClick = (event: React.MouseEvent<HTMLElement>, track: TTrack) => {
+  const handleTrackClick = (event: React.MouseEvent<HTMLElement>) => {
     const targetElement = event.currentTarget
     if (targetElement) {
       targetElement.scrollIntoView({
@@ -141,7 +141,7 @@ const HomePage = () => {
           {data?.map((track, index) => (
             <div
               key={track.title}
-              onClick={e => handleTrackClick(e, track)}
+              onClick={e => handleTrackClick(e)}
               className={style.track_item}>
               <audioPlayerDepsContext.Provider value={{ ...getPlayerDeps(track, index) }}>
                 <AudioPlayer src={track.url} />
