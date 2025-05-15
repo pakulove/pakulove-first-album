@@ -12,6 +12,14 @@
   position: relative;
   z-index: 1;
 
+  @media (max-width: 768px) {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
   &.playing {
     border-color: white;
   }
@@ -20,6 +28,10 @@
 .wrapper {
   position: relative;
   height: 100%;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
 }
 
 .cover_image {
@@ -29,17 +41,31 @@
   border-radius: 8px;
   margin-bottom: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    width: 150px;
+    height: 150px;
+  }
 }
 
 .player_title {
   color: #cdcdcd;
   margin-bottom: 0.6rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+  }
 }
 
 .player_production {
   color: rgba(134, 134, 134, 0.824);
   margin-bottom: 1.5rem;
   font-size: small;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
 }
 
 .play_button {
@@ -67,6 +93,13 @@
   position: relative;
   line-height: 48px;
   padding: 0;
+
+  @media (max-width: 768px) {
+    height: 40px;
+    min-width: 60px;
+    font-size: 16px;
+    margin-bottom: 1rem;
+  }
 }
 
 .play_button:hover {
@@ -77,6 +110,10 @@
 .progress_container {
   width: 100%;
   margin: 1rem 0;
+
+  @media (max-width: 768px) {
+    margin: 0.5rem 0;
+  }
 }
 
 .progress_bar {
@@ -86,6 +123,10 @@
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 768px) {
+    height: 4px;
+  }
 }
 
 .progress_active {

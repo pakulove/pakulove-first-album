@@ -14,6 +14,10 @@
   &.current {
     transform: translateX(155%) translateY(-50%);
   }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .disc_image {

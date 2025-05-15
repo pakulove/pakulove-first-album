@@ -101,7 +101,7 @@ const HomePage = () => {
               setIsImageChanged(false)
             }, 500)
           }
-        }   
+        }
 
         audioElement.addEventListener('timeupdate', handleTimeUpdate)
 
