@@ -19,22 +19,47 @@ const HomePage = () => {
   const { data, isLoading, isError, error } = useQuery(tracksQueryOptions)
 
   const preloadImages = (track: TTrack) => {
+    const imagePromises: Promise<void>[] = []
+
     // Предзагружаем все изображения из picturesAtTime, кроме default
     track.picturesAtTime.forEach(pic => {
       if (pic.name !== 'default') {
         const img = new Image()
         img.src = `${BASE_URL}/cover/${pic.name}`
+        imagePromises.push(
+          new Promise((resolve, reject) => {
+            img.onload = () => resolve()
+            img.onerror = reject
+          })
+        )
       }
     })
+
     // Предзагружаем reverse.png
     const reverseImg = new Image()
     reverseImg.src = `${BASE_URL}/cover/reverse.png`
+    imagePromises.push(
+      new Promise((resolve, reject) => {
+        reverseImg.onload = () => resolve()
+        reverseImg.onerror = reject
+      })
+    )
+
+    return Promise.all(imagePromises)
   }
 
   // Предзагрузка при монтировании компонента
   useEffect(() => {
     if (data) {
-      data.forEach(track => preloadImages(track))
+      // Предзагружаем изображения для первых двух треков сразу
+      const firstTwoTracks = data.slice(0, 2)
+      firstTwoTracks.forEach(track => preloadImages(track))
+
+      // Остальные треки загружаем в фоне
+      const remainingTracks = data.slice(2)
+      remainingTracks.forEach(track => {
+        setTimeout(() => preloadImages(track), 1000)
+      })
     }
   }, [data])
 
@@ -139,10 +164,7 @@ const HomePage = () => {
       <div className={style.wrapper}>
         <section ref={audioListRef} className={style.track_list}>
           {data?.map((track, index) => (
-            <div
-              key={track.title}
-              onClick={e => handleTrackClick(e)}
-              className={style.track_item}>
+            <div key={track.title} onClick={e => handleTrackClick(e)} className={style.track_item}>
               <audioPlayerDepsContext.Provider value={{ ...getPlayerDeps(track, index) }}>
                 <AudioPlayer src={track.url} />
               </audioPlayerDepsContext.Provider>

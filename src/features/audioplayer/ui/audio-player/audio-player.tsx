@@ -13,6 +13,18 @@ export type AudioPlayerProps = React.DetailedHTMLProps<
   HTMLAudioElement
 >
 
+const PlayIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 5.14V19.14L19 12.14L8 5.14Z" fill="currentColor" />
+  </svg>
+)
+
+const PauseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z" fill="currentColor" />
+  </svg>
+)
+
 export const AudioPlayer: FC<AudioPlayerProps> = props => {
   return (
     <AudioStoreProvider>
@@ -48,7 +60,7 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
         <h1 className={styles.player_title}>{title}</h1>
         <p className={styles.player_production}>prod. by {productBy}</p>
         <button className={styles.play_button} onClick={togglePlay}>
-          {isPlaying ? '⏸' : '▶'}
+          {isPlaying ? <PauseIcon /> : <PlayIcon />}
         </button>
         <div className={styles.progress_container}>
           <div

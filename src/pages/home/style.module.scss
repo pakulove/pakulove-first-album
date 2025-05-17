@@ -367,4 +367,11 @@
 .track_item {
   cursor: pointer;
   scroll-snap-align: center;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 500px;
+    margin: 0 auto;
+  }
 }
