@@ -1,4 +1,4 @@
-import { BASE_URL } from '@shared/api/base'
+import { BASE_URL, fetchConfig } from '@shared/api/base'
 import { queryClient } from '@shared/api/query-client'
 import { trackService, type TracksDTO } from '@shared/api/track'
 import type { TTrack } from './type'
@@ -18,6 +18,7 @@ export const tracksQueryOptions = {
       url: `${BASE_URL}/stream/${index + 1}.mp3`,
       discURL: `${BASE_URL}/disc/${index + 1}.png`,
       coverURL: `${BASE_URL}/cover/`,
+      fetchConfig,
     }))
   },
 }

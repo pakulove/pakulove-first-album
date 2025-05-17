@@ -10,4 +10,13 @@ export type TTrack = {
   productBy: string
   coverURL: string
   discURL: string
+  fetchConfig: {
+    credentials: 'include'
+    mode: 'cors'
+    headers: {
+      'Content-Type': string
+      Accept: string
+    }
+    referrerPolicy: 'no-referrer-when-downgrade'
+  }
 }
