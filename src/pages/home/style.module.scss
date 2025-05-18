@@ -391,6 +391,10 @@
   
   p {
     margin-bottom: 0.5rem;
+    
+    @media (min-width: 769px) {
+      display: none;
+    }
   }
   
   a {
