@@ -197,6 +197,15 @@ const HomePage = () => {
           </svg>
         </button>
       </section>
+      <div className={style.footer}>
+        <p>Для лучшего экспириенса рекомендуем открыть на широком экране</p>
+        <a
+          href="https://music.yandex.com/users/danilapakulov/playlists/1011?utm_source=web&utm_medium=copy_link"
+          target="_blank"
+          rel="noopener noreferrer">
+          Вдохновившие треки
+        </a>
+      </div>
     </div>
   )
 }

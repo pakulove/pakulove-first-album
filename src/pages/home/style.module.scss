@@ -375,3 +375,31 @@
     margin: 0 auto;
   }
 }
+
+.footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  
+  p {
+    margin-bottom: 0.5rem;
+  }
+  
+  a {
+    color: var(--text-color);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    transition: opacity 0.2s;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    font-size: 0.75rem;
+  }
+}
