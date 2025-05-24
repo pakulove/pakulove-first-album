@@ -185,6 +185,29 @@ const HomePage = () => {
             } as React.CSSProperties
           }
         />
+        <div className={style.image_arrow}>
+          <svg
+            width="120"
+            height="80"
+            viewBox="0 0 120 80"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M10 40C10 40 30 20 50 20C70 20 90 40 110 40"
+              stroke="rgba(255, 255, 255, 0.6)"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M100 35L110 40L100 45"
+              stroke="rgba(255, 255, 255, 0.6)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className={style.image_caption}>здесь будут сопроводительные фотографии</span>
+        </div>
         <button
           className={style.flip_button}
           onClick={() => setIsFlipped(!isFlipped)}
@@ -198,12 +221,12 @@ const HomePage = () => {
         </button>
       </section>
       <div className={style.footer}>
-        <p>Для лучшего экспириенса рекомендуем открыть на широком экране</p>
+        <p>для лучшего экспириенса рекомендуем открыть на широком экране</p>
         <a
           href="https://music.yandex.com/users/danilapakulov/playlists/1011?utm_source=web&utm_medium=copy_link"
           target="_blank"
           rel="noopener noreferrer">
-          Вдохновившие треки
+          вдохновившие треки
         </a>
       </div>
     </div>
