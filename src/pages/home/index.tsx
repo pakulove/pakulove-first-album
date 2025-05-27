@@ -10,7 +10,7 @@ const trackExists = (index: number, tracks: unknown[]) => index < tracks.length
 
 const HomePage = () => {
   const [isFlipped, setIsFlipped] = useState(false)
-  const [currentImage, setCurrentImage] = useState('cover.png')
+  const [currentImage, setCurrentImage] = useState('cover.webp')
   const [isImageChanged, setIsImageChanged] = useState(false)
   const animationTimeoutRef = useRef<NodeJS.Timeout>(null)
   const preloadedImagesRef = useRef<Set<string>>(new Set())
@@ -45,8 +45,8 @@ const HomePage = () => {
       }
     })
 
-    // Предзагружаем reverse.png
-    imagePromises.push(preloadImage(`${BASE_URL}/cover/reverse.png`))
+    // Предзагружаем reverse.webp
+    imagePromises.push(preloadImage(`${BASE_URL}/cover/reverse.webp`))
 
     return Promise.all(imagePromises)
   }
