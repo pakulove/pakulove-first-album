@@ -5,15 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pakulove - цсмж: плоть голограммы</title>
-    <!-- Preload main cover image -->
-    <link rel="preload" as="image" href="http://80.87.98.111:8000/cover/" />
+    <!-- Preload main cover image with high priority -->
+    <link rel="preload" as="image" href="http://80.87.98.111:8000/cover/cover.webp" fetchpriority="high" />
+    <!-- Preload reverse image -->
+    <link rel="preload" as="image" href="http://80.87.98.111:8000/cover/reverse.webp" fetchpriority="low" />
     <!-- Preload critical fonts -->
-    <link
-      rel="preload"
-      as="font"
-      href="/fonts/Roboto.woff2"
-      type="font/woff2"
-      crossorigin />
+    <link rel="preload" as="font" href="/fonts/Roboto.woff2" type="font/woff2" crossorigin />
     <!-- Preconnect to API -->
     <link rel="preconnect" href="http://80.87.98.111:8000" />
   </head>

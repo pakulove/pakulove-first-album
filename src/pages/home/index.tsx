@@ -10,13 +10,76 @@ const trackExists = (index: number, tracks: unknown[]) => index < tracks.length
 
 const HomePage = () => {
   const [isFlipped, setIsFlipped] = useState(false)
-  const [currentImage, setCurrentImage] = useState('cover.webp')
+  const [currentImage, setCurrentImage] = useState('cover.png')
   const [isImageChanged, setIsImageChanged] = useState(false)
   const animationTimeoutRef = useRef<NodeJS.Timeout>(null)
+  const preloadedImagesRef = useRef<Set<string>>(new Set())
 
   const audioListRef = useRef<HTMLDivElement>(null)
   const { activeTrack, updateActiveTrack } = useActiveTrackStore()
   const { data, isLoading, isError, error } = useQuery(tracksQueryOptions)
+
+  const preloadImage = (url: string): Promise<void> => {
+    if (preloadedImagesRef.current.has(url)) {
+      return Promise.resolve()
+    }
+
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        preloadedImagesRef.current.add(url)
+        resolve()
+      }
+      img.onerror = reject
+      img.src = url
+    })
+  }
+
+  const preloadImages = (track: TTrack) => {
+    const imagePromises: Promise<void>[] = []
+
+    // Предзагружаем все изображения из picturesAtTime, кроме default
+    track.picturesAtTime.forEach(pic => {
+      if (pic.name !== 'default') {
+        imagePromises.push(preloadImage(`${BASE_URL}/cover/${pic.name}`))
+      }
+    })
+
+    // Предзагружаем reverse.png
+    imagePromises.push(preloadImage(`${BASE_URL}/cover/reverse.png`))
+
+    return Promise.all(imagePromises)
+  }
+
+  // Предзагрузка при монтировании компонента
+  useEffect(() => {
+    if (data) {
+      // Предзагружаем изображения для первого трека сразу
+      const firstTrack = data[0]
+      if (firstTrack) {
+        preloadImages(firstTrack)
+      }
+
+      // Остальные треки загружаем в фоне с приоритетами
+      const remainingTracks = data.slice(1)
+      remainingTracks.forEach((track, index) => {
+        // Загружаем следующие 2 трека сразу
+        if (index < 2) {
+          preloadImages(track)
+        } else {
+          // Остальные загружаем с задержкой
+          setTimeout(() => preloadImages(track), 1000 * (index - 1))
+        }
+      })
+    }
+  }, [data])
+
+  // Предзагрузка при смене активного трека
+  useEffect(() => {
+    if (activeTrack) {
+      preloadImages(activeTrack)
+    }
+  }, [activeTrack])
 
   // Скроллинг к активному треку
   useEffect(() => {
