@@ -1,4 +1,4 @@
-export const BASE_URL = process.env.BACKEND_URL || 'http://80.87.98.111:8000'
+export const BASE_URL = process.env.BACKEND_URL || 'https://album.pakulove.ru:8000'
 
 export const defaultHeaders = {
   'Content-Type': 'application/json',
