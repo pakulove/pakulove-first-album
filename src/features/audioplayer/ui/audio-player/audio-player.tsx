@@ -72,6 +72,13 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
               style={{ width: isActive ? `${progress}%` : '0%' }}
               data-track-index={trackIndex}
             />
+            <div
+              className={styles.progress_hover}
+              style={{
+                left: isActive ? `${progress}%` : '0%',
+                opacity: isActive ? 1 : 0,
+              }}
+            />
           </div>
           <div className={styles.time_display}>
             <Timer time={currentTime} />
