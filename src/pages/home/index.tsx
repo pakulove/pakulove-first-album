@@ -18,58 +18,6 @@ const HomePage = () => {
   const { activeTrack, updateActiveTrack } = useActiveTrackStore()
   const { data, isLoading, isError, error } = useQuery(tracksQueryOptions)
 
-  const preloadImages = (track: TTrack) => {
-    const imagePromises: Promise<void>[] = []
-
-    // Предзагружаем все изображения из picturesAtTime, кроме default
-    track.picturesAtTime.forEach(pic => {
-      if (pic.name !== 'default') {
-        const img = new Image()
-        img.src = `${BASE_URL}/cover/${pic.name}`
-        imagePromises.push(
-          new Promise((resolve, reject) => {
-            img.onload = () => resolve()
-            img.onerror = reject
-          })
-        )
-      }
-    })
-
-    // Предзагружаем reverse.png
-    const reverseImg = new Image()
-    reverseImg.src = `${BASE_URL}/cover/reverse.png`
-    imagePromises.push(
-      new Promise((resolve, reject) => {
-        reverseImg.onload = () => resolve()
-        reverseImg.onerror = reject
-      })
-    )
-
-    return Promise.all(imagePromises)
-  }
-
-  // Предзагрузка при монтировании компонента
-  useEffect(() => {
-    if (data) {
-      // Предзагружаем изображения для первых двух треков сразу
-      const firstTwoTracks = data.slice(0, 2)
-      firstTwoTracks.forEach(track => preloadImages(track))
-
-      // Остальные треки загружаем в фоне
-      const remainingTracks = data.slice(2)
-      remainingTracks.forEach(track => {
-        setTimeout(() => preloadImages(track), 1000)
-      })
-    }
-  }, [data])
-
-  // Предзагрузка при смене активного трека
-  useEffect(() => {
-    if (activeTrack) {
-      preloadImages(activeTrack)
-    }
-  }, [activeTrack])
-
   // Скроллинг к активному треку
   useEffect(() => {
     if (activeTrack && audioListRef.current) {
