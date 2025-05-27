@@ -1,6 +1,6 @@
 import { useStrictContext } from '@shared/lib/react'
 import cn from 'classnames'
-import { type FC } from 'react'
+import { type FC, useCallback, useState } from 'react'
 import { useAudioPlayerDeps } from '../../deps'
 import { useAudio } from '../../model/useAudio'
 import { audioStoreContext, AudioStoreProvider } from '../audio-store-provider'
@@ -38,6 +38,8 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const { handlePlay, togglePlay, handleProgressBarClick, ...audioHandlers } = handlers
   const { currentTime, durationTime, isPlaying, progress } = useStrictContext(audioStoreContext)
   const { isActive, coverURL, productBy, title, trackIndex } = useAudioPlayerDeps()
+  const [isDragging, setIsDragging] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
 
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
     const audio = e.currentTarget
@@ -49,6 +51,36 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
       audioHandlers.onLoadedMetadata()
     }
   }
+
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!isActive) return
+      setIsDragging(true)
+      handleProgressBarClick(e)
+    },
+    [isActive, handleProgressBarClick]
+  )
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!isDragging || !isActive) return
+      handleProgressBarClick(e)
+    },
+    [isDragging, isActive, handleProgressBarClick]
+  )
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovering(true)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovering(false)
+    setIsDragging(false)
+  }, [])
 
   return (
     <div className={styles.wrapper}>
@@ -62,11 +94,19 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
         <button className={styles.play_button} onClick={togglePlay}>
           {isPlaying ? <PauseIcon /> : <PlayIcon />}
         </button>
-        <div className={styles.progress_container}>
+        <div
+          className={styles.progress_container}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}>
           <div
-            className={styles.progress_bar}
-            style={{ cursor: isActive ? 'pointer' : 'auto' }}
-            onClick={isActive ? handleProgressBarClick : undefined}>
+            className={cn(styles.progress_bar, {
+              [styles.hovering]: isHovering,
+              [styles.dragging]: isDragging,
+            })}
+            style={{ cursor: isActive ? 'pointer' : 'auto' }}>
             <div
               className={styles.progress}
               style={{ width: isActive ? `${progress}%` : '0%' }}
@@ -76,7 +116,7 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
               className={styles.progress_hover}
               style={{
                 left: isActive ? `${progress}%` : '0%',
-                opacity: isActive ? 1 : 0,
+                opacity: isActive ? (isHovering || isDragging ? 1 : 0.5) : 0,
               }}
             />
           </div>
