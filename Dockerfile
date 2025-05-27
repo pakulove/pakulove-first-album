@@ -12,7 +12,8 @@ FROM nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
+COPY ssl/__pakulove_ru.crt /etc/nginx/ssl/__pakulove_ru.crt
+COPY ssl/__pakulove_ru.key /etc/nginx/ssl/__pakulove_ru.key
+EXPOSE 443
 
 CMD ["nginx", "-g", "daemon off;"] 
