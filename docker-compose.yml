@@ -13,5 +13,6 @@ services:
       - frontend-network
 
 networks:
-  frontend-network:
-    driver: bridge 
+  default:
+    name: shared-network
+    external: true
