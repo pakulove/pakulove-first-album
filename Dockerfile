@@ -12,7 +12,7 @@ FROM nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY ssl__pakulove_ru/__pakulove_ru.crt /etc/nginx/ssl/__pakulove_ru.crt
+COPY ssl/__pakulove_ru/__pakulove_ru.crt /etc/nginx/ssl/__pakulove_ru.crt
 COPY ssl/__pakulove_ru/__pakulove_ru.key /etc/nginx/ssl/__pakulove_ru.key
 EXPOSE 443
 
