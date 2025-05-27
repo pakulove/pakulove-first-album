@@ -2,9 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pakulove - цсмж: плоть голограммы</title>
+    <!-- Preload main cover image -->
+    <link rel="preload" as="image" href="/cover/cover.webp" />
+    <!-- Preload critical fonts -->
+    <link
+      rel="preload"
+      as="font"
+      href="/fonts/Jersey 25.woff2"
+      type="font/woff2"
+      crossorigin />
+    <!-- Preconnect to API -->
+    <link rel="preconnect" href="http://80.87.98.111:8000" />
   </head>
   <body>
     <div id="root"></div>

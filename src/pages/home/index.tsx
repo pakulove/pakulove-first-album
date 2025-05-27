@@ -10,7 +10,7 @@ const trackExists = (index: number, tracks: unknown[]) => index < tracks.length
 
 const HomePage = () => {
   const [isFlipped, setIsFlipped] = useState(false)
-  const [currentImage, setCurrentImage] = useState('cover.png')
+  const [currentImage, setCurrentImage] = useState('cover.webp')
   const [isImageChanged, setIsImageChanged] = useState(false)
   const animationTimeoutRef = useRef<NodeJS.Timeout>(null)
 
@@ -63,8 +63,8 @@ const HomePage = () => {
           const picture = activeTrack.picturesAtTime.find(pic => pic.second === currentTime)
           if (picture) {
             setIsImageChanged(true)
-            // Если пришло слово default, используем cover.png
-            setCurrentImage(picture.name === 'default' ? 'cover.png' : picture.name)
+            // Если пришло слово default, используем cover.webp
+            setCurrentImage(picture.name === 'default' ? 'cover.webp' : picture.name)
             // Сбрасываем предыдущий таймаут если он есть
             if (animationTimeoutRef.current) {
               clearTimeout(animationTimeoutRef.current)
@@ -129,7 +129,7 @@ const HomePage = () => {
           style={
             {
               '--front-image': `url(${BASE_URL}/cover/${currentImage})`,
-              '--back-image': `url(${BASE_URL}/cover/reverse.png)`,
+              '--back-image': `url(${BASE_URL}/cover/reverse.webp)`,
             } as React.CSSProperties
           }
         />
@@ -159,7 +159,7 @@ const HomePage = () => {
         <button
           className={style.flip_button}
           onClick={() => setIsFlipped(!isFlipped)}
-          title="Перевернуть обложку">
+          title="перевернуть обложку">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
             <path
               d="M7.11 8.53L5.7 7.11C4.8 8.27 4.24 9.61 4.07 11h2.02c.14-.87.49-1.72 1.02-2.47zM6.09 13H4.07c.17 1.39.72 2.73 1.62 3.89l1.41-1.42c-.52-.75-.87-1.59-1.01-2.47zm1.01 5.32c1.16.9 2.51 1.44 3.9 1.61V17.9c-.87-.15-1.71-.49-2.46-1.03L7.1 18.32zM13 4.07V1L8.45 5.55 13 10V6.09c2.84.48 5 2.94 5 5.91s-2.16 5.43-5 5.91v2.02c3.95-.49 7-3.85 7-7.93s-3.05-7.44-7-7.93z"

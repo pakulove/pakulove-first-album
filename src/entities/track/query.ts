@@ -16,8 +16,8 @@ export const tracksQueryOptions = {
       productBy: prod,
       picturesAtTime: pics.map(({ sec, name }) => ({ second: sec, name })),
       url: `${BASE_URL}/stream/${index + 1}.mp3`,
-      discURL: `${BASE_URL}/disc/${index + 1}.png`,
-      coverURL: `${BASE_URL}/cover/`,
+      discURL: `${BASE_URL}/disc/${index + 1}.webp`,
+      coverURL: `${BASE_URL}/cover/cover256.webp`,
       fetchConfig,
     }))
   },
