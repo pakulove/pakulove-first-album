@@ -1,6 +1,6 @@
 import { useStrictContext } from '@shared/lib/react'
 import cn from 'classnames'
-import { type FC, useCallback, useState } from 'react'
+import { type FC, useCallback, useEffect, useState } from 'react'
 import { useAudioPlayerDeps } from '../../deps'
 import { useAudio } from '../../model/useAudio'
 import { audioStoreContext, AudioStoreProvider } from '../audio-store-provider'
@@ -40,6 +40,18 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
   const { isActive, coverURL, productBy, title, trackIndex } = useAudioPlayerDeps()
   const [isDragging, setIsDragging] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && isActive) {
+        e.preventDefault()
+        togglePlay()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isActive, togglePlay])
 
   const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLAudioElement>) => {
     const audio = e.currentTarget
@@ -109,16 +121,10 @@ const AudioPlayerContent: FC<AudioPlayerProps> = props => {
             style={{ cursor: isActive ? 'pointer' : 'auto' }}>
             <div
               className={styles.progress}
-              style={{ width: isActive ? `${progress}%` : '0%' }}
+              style={{ width: `${progress}%` }}
               data-track-index={trackIndex}
             />
-            <div
-              className={styles.progress_hover}
-              style={{
-                left: isActive ? `${progress}%` : '0%',
-                opacity: isActive ? (isHovering || isDragging ? 1 : 0.5) : 0,
-              }}
-            />
+            <div className={styles.progress_hover} style={{ left: `${progress}%` }} />
           </div>
           <div className={styles.time_display}>
             <Timer time={currentTime} />
